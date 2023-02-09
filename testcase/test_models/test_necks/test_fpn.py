@@ -45,7 +45,6 @@ class TestFPNTestCase:
         self.fpn_model.register_forward_hook(self.base_util.base_hook_forward_fn)
         self.fpn_model.register_backward_hook(self.base_util.base_hook_backward_fn)
 
-        # FPN expects a multiple levels of features per image
         feats = [
             torch.rand(1, self.in_channels[i], self.feat_sizes[i], self.feat_sizes[i])
             for i in range(len(self.in_channels))
@@ -56,10 +55,9 @@ class TestFPNTestCase:
 
     @pytest.mark.prof
     def test_fpn_prof(self):
-        # FPN expects a multiple levels of features per image
         feats = [
             torch.rand(1, self.in_channels[i], self.feat_sizes[i], self.feat_sizes[i])
             for i in range(len(self.in_channels))
         ]
-        prof_path = './data/prof_time_summary/necks/fpn/fpn.csv'
+        prof_path = './data/prof_time_summary/necks/fpn/fpn_prof.csv'
         self.base_util.run_and_compare_prof(self.fpn_model, prof_path, time_threshold=0.1, inputs=feats)

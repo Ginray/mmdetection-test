@@ -33,10 +33,11 @@ def set_seed(seed=0):
 test_cases = [
     "./testcase/test_models/test_backbones/test_resnet.py",
     "./testcase/test_models/test_necks/test_fpn.py",
-    "./testcase/test_models/test_heads/test_roi_extractor.py"
+    "./testcase/test_models/test_heads/test_single_roi_extractor.py",
+    "./testcase/test_models/test_heads/test_shared2FCB_box_head.py"
 ]
 
 if __name__ == "__main__":
     set_seed()
     pytest.main(["-s", "./testcase/test_models/"])  # "-m acc "
-    # pytest.main(["-s", test_cases[2]])
+    # pytest.main(["-s", test_cases[3]])

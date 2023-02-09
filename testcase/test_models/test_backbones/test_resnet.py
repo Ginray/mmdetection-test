@@ -42,5 +42,5 @@ class TestResnetTestCase:
     def test_resnet_basic_block_prof(self):
         # test BasicBlock structure and forward
         input = torch.rand(1, 64, 56, 56)
-        prof_path = './data/prof_time_summary/backbones/resnet/resnet.csv'
+        prof_path = './data/prof_time_summary/backbones/resnet/resnet_prof.csv'
         self.base_util.run_and_compare_prof(self.block, prof_path, time_threshold=0.4, x=input)
