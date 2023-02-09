@@ -4,25 +4,24 @@
 
 ### backbones:
 
-| <div style="width:300px">name</div> | performance | accuracy |
-| ------------------ | ----------- | -------- |
+| module name   | performance | accuracy |
+|--------| ----------- | -------- |
 | ResNet | ✔           | ✔       |
-|                    |             |          |
-|                    |             |          |
-
-### heads:
-
-| <div style="width:300px">name</div> | performance | accuracy |
-| ------------------ | ----------- | -------- |
-| Shared2FCBBoxHead  | ✔           | ✔       |
-| SingleRoIExtractor | ❌          | ❌       |
-|                    |             |          |
+|        |             |          |
+|        |             |          |
 
 ### necks:
 
-| <div style="width:300px">name</div> | performance | accuracy |
+| module name   | performance | accuracy |
 | ------------------ | ----------- | -------- |
 | FPN | ✔           | ✔       |
 |                    |             |          |
 |                    |             |          |
 
+### heads:
+
+| module name        | performance | accuracy |
+|--------------------| ----------- | -------- |
+| Shared2FCBBoxHead  | ✔           | ✔       |
+| SingleRoIExtractor | ❌          | ❌       |
+|                    |             |          |
