@@ -66,33 +66,49 @@ class BaseUtil:
         else:
             raise ValueError
 
-    def run_step(self, module, input):
-        module = module.to(self._device)
-        if isinstance(input, list):
-            input_list = [each_input.to(self._device) for each_input in input]
-            input = input_list
-        elif isinstance(input, torch.Tensor):
-            input = input.to(self._device)
-        else:
-            raise NotImplementedError
+    def set_input_to_device(self, **input):
+        for key, value in input.items():
+            if isinstance(value, torch.Tensor):
+                value = value.to(self._device)
+            elif isinstance(value, list):
+                value_list = [each_value.to(self._device) for each_value in value]
+                value = value_list
+            elif isinstance(value, tuple):
+                value_tuple = tuple(each_value.to(self._device) for each_value in value)
+                value = value_tuple
+            else:
+                raise NotImplementedError('[set_input_to_device] {0} is currently not supported. '.format(type(value)))
+            input[key] = value
+        return input
 
-        output = module(input)
+    def run_step(self, module, **input):
+        module = module.to(self._device)
+        input = self.set_input_to_device(**input)
+        output = module(**input)
         if isinstance(output, tuple):
+            if not output[0].requires_grad:
+                if LOGGING_LEVEL <= LoggingLevel.warn:
+                    print('[run_step] Warning, output[0].requires_grad is False, set to True.')
+                output[0].requires_grad_(True)
             output[0].mean().backward()
         elif isinstance(output, torch.Tensor):
+            if not output.requires_grad:
+                print('[run_step] Warning, output.requires_grad is False, set to True.')
+                output.requires_grad_(True)
             output.mean().backward()
         else:
-            raise NotImplementedError
-
+            raise NotImplementedError('[run_step] {0} is currently not supported. '.format(type(output)))
         return output
 
-    def run_and_compare_acc(self, module, input, module_name=None):
+    def run_and_compare_acc(self, module, module_name=None, **input):
         from utils.acc_utils import accuracy_comparison
 
         self.set_device('cpu')
-        self.run_step(module, input)
+        self.run_step(module, **input)
+        if LOGGING_LEVEL <= LoggingLevel.info:
+            print('==> module {} finish running on the cpu and start executing on npu. '.format(module_name))
         self.set_device('npu')
-        self.run_step(module, input)
+        self.run_step(module, **input)
 
         if LOGGING_LEVEL <= LoggingLevel.info:
             print('==> start compare forward, module_name=', module_name)
@@ -102,12 +118,12 @@ class BaseUtil:
             print('==> start compare backward, module_name=', module_name)
         accuracy_comparison(self.npu_grad_list, self.cpu_grad_list)
 
-    def run_and_compare_prof(self, module, input, prof_path, time_threshold=0.1):
+    def run_and_compare_prof(self, module, prof_path, time_threshold=0.1, **input):
         from utils.prof_utils import save_time, compare_with_best_time
 
         time_start = time.time()
         self.set_device('npu')
-        self.run_step(module, input)
+        self.run_step(module, **input)
         time_one_step = time.time() - time_start
 
         save_time(time_one_step, prof_path)

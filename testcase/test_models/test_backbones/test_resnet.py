@@ -36,11 +36,11 @@ class TestResnetTestCase:
         self.block.register_backward_hook(self.base_util.base_hook_backward_fn)
 
         input = torch.rand(1, 64, 56, 56)
-        self.base_util.run_and_compare_acc(self.block, input, 'Resnet')
+        self.base_util.run_and_compare_acc(self.block, 'Resnet', x=input)
 
     @pytest.mark.prof
     def test_resnet_basic_block_prof(self):
         # test BasicBlock structure and forward
         input = torch.rand(1, 64, 56, 56)
         prof_path = './data/prof_time_summary/backbones/resnet/resnet.csv'
-        self.base_util.run_and_compare_prof(self.block, input, prof_path, time_threshold=0.4)
+        self.base_util.run_and_compare_prof(self.block, prof_path, time_threshold=0.4, x=input)

@@ -52,15 +52,14 @@ class TestFPNTestCase:
         ]
 
         COMPARISON_HOOK.update_threshold('value', 0.015)
-        self.base_util.run_and_compare_acc(self.fpn_model, feats, 'FPN')
+        self.base_util.run_and_compare_acc(self.fpn_model, 'FPN', inputs=feats)
 
     @pytest.mark.prof
     def test_fpn_prof(self):
-        """Tests fpn."""
         # FPN expects a multiple levels of features per image
         feats = [
             torch.rand(1, self.in_channels[i], self.feat_sizes[i], self.feat_sizes[i])
             for i in range(len(self.in_channels))
         ]
         prof_path = './data/prof_time_summary/necks/fpn/fpn.csv'
-        self.base_util.run_and_compare_prof(self.fpn_model, feats, prof_path, time_threshold=0.1)
+        self.base_util.run_and_compare_prof(self.fpn_model, prof_path, time_threshold=0.1, inputs=feats)

@@ -16,6 +16,8 @@ import pytest
 import torch
 
 from mmdet.models.roi_heads.roi_extractors import SingleRoIExtractor
+from utils.acc_utils import COMPARISON_HOOK
+from utils.base_utils import BaseUtil
 
 
 class TestSingleRoIExtractorTestCase:
@@ -35,9 +37,10 @@ class TestSingleRoIExtractorTestCase:
         COMPARISON_HOOK.rollback_threshold()
 
     @pytest.mark.acc
-    def test_fpn_acc(self):
-        self.fpn_model.register_forward_hook(self.base_util.base_hook_forward_fn)
-        self.fpn_model.register_backward_hook(self.base_util.base_hook_backward_fn)
+    @pytest.mark.skip(reason='roi_align currently not supported on npu, fix it before 2023/03/31.')
+    def test_roi_extractor_acc(self):
+        self.roi_extractor.register_forward_hook(self.base_util.base_hook_forward_fn)
+        self.roi_extractor.register_backward_hook(self.base_util.base_hook_backward_fn)
 
         feats = (
             torch.rand((1, 256, 200, 336)),
@@ -47,4 +50,17 @@ class TestSingleRoIExtractorTestCase:
         )
         rois = torch.tensor([[0.0000, 587.8285, 52.1405, 886.2484, 341.5644]])
 
-        self.base_util.run_and_compare_acc(self.fpn_model, {'feats': feats, 'rois': rois}, 'FPN')
+        self.base_util.run_and_compare_acc(self.roi_extractor, 'RoIExtractor', feats=feats, rois=rois)
+
+    @pytest.mark.prof
+    @pytest.mark.skip(reason='roi_align currently not supported on npu, fix it before 2023/03/31.')
+    def test_roi_extractor_prof(self):
+        feats = (
+            torch.rand((1, 256, 200, 336)),
+            torch.rand((1, 256, 100, 168)),
+            torch.rand((1, 256, 50, 84)),
+            torch.rand((1, 256, 25, 42)),
+        )
+        rois = torch.tensor([[0.0000, 587.8285, 52.1405, 886.2484, 341.5644]])
+        prof_path = './data/prof_time_summary/necks/fpn/fpn.csv'
+        self.base_util.run_and_compare_prof(self.roi_extractor, prof_path, time_threshold=0.1, feats=feats, rois=rois)
