@@ -15,8 +15,6 @@
 import torch
 import logging
 
-cos = torch.nn.CosineSimilarity(dim=1)
-
 
 class ComparisonHook(object):
 
@@ -28,8 +26,17 @@ class ComparisonHook(object):
 
     def register_comparison_hook(self, name, comparison_fn, threshold=None):
         self.comparison_fn_map[name] = comparison_fn
+        if name not in self.default_threshold.keys():
+            assert threshold is not None, "Please enter threshold for hook{0}. ".format(name)
         if threshold is not None:
             self.threshold[name] = threshold
+
+    def delete_comparison_hook(self, name):
+
+        if name in self.comparison_fn_map.keys():
+            del self.comparison_fn_map[name]
+        if name in self.threshold.keys():
+            del self.threshold[name]
 
     def compare(self, outputs, outputs_expected):
         for name, each_compare in self.comparison_fn_map.items():
@@ -49,6 +56,7 @@ COMPARISON_HOOK = ComparisonHook()
 def cos_comparison(outputs, outputs_expected, cos_threshold):
     assert isinstance(outputs, torch.Tensor)
     assert isinstance(outputs_expected, torch.Tensor)
+    cos = torch.nn.CosineSimilarity(dim=1)
     max_value_of_output = outputs_expected.max()
     if max_value_of_output < 1.0:
         scale = 1.0 / max_value_of_output

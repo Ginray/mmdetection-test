@@ -18,6 +18,7 @@ import numpy as np
 import pytest
 import torch
 import torch_npu
+from utils.base_utils import set_device_info
 
 
 def set_seed(seed=0):
@@ -38,6 +39,7 @@ test_cases = [
 ]
 
 if __name__ == "__main__":
+    set_device_info('910B')
     set_seed()
     pytest.main(["-s", "./testcase/test_models/"])  # "-m acc "
     # pytest.main(["-s", test_cases[3]])
