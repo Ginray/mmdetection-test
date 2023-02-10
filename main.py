@@ -16,6 +16,7 @@ import random
 
 import numpy as np
 import pytest
+import argparse
 import torch
 import torch_npu
 from utils.base_utils import set_device_info
@@ -31,15 +32,59 @@ def set_seed(seed=0):
     torch.backends.cudnn.benchmark = False
 
 
+def get_parser():
+    """Construct the parser."""
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument(
+        "--scope",
+        type=str,
+        default="all",
+        choices=["acc", "prof", "all", "single"],
+        help="Test the case marked prof/acc.",
+    )
+    parser.add_argument(
+        "--device",
+        type=str,
+        default="UNKNOWN",
+        choices=["UNKNOWN", "910B", "910ProB", "910A"],
+        help="The device name of NPU.",
+    )
+    parser.add_argument(
+        "--case_id",
+        type=int,
+        default=0,
+        help="ID of the test case, only used when the scope is single.",
+    )
+
+    return parser
+
+
 test_cases = [
     "./testcase/test_models/test_backbones/test_resnet.py",
     "./testcase/test_models/test_necks/test_fpn.py",
     "./testcase/test_models/test_heads/test_single_roi_extractor.py",
-    "./testcase/test_models/test_heads/test_shared2FCB_box_head.py"
+    "./testcase/test_models/test_heads/test_shared2FCB_box_head.py",
+    "./testcase/test_models/test_others/test_cross_entropy_loss.py"
 ]
 
-if __name__ == "__main__":
-    set_device_info('910B')
+
+def main():
+    parser = get_parser()
+    args = parser.parse_args()
+    set_device_info(args.device)
     set_seed()
-    pytest.main(["-s", "./testcase/test_models/"])  # "-m acc "
-    # pytest.main(["-s", test_cases[3]])
+    if args.scope == "all":
+        pytest.main(["-s", "./testcase/test_models/"])
+    elif args.scope == "acc":
+        pytest.main(["-m acc ", "-s", "./testcase/test_models/"])
+    elif args.scope == "prof":
+        pytest.main(["-m prof ", "-s", "./testcase/test_models/"])
+    elif args.scope == "single":
+        pytest.main(["-s", test_cases[args.case_id]])
+
+
+if __name__ == "__main__":
+    main()

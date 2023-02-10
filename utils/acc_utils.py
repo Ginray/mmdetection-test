@@ -16,43 +16,6 @@ import torch
 import logging
 
 
-class ComparisonHook(object):
-
-    def __init__(self):
-        self.comparison_fn_map = {}
-        self.default_threshold = {'cos': 0.999,
-                                  'value': 0.01}
-        self.threshold = self.default_threshold.copy()
-
-    def register_comparison_hook(self, name, comparison_fn, threshold=None):
-        self.comparison_fn_map[name] = comparison_fn
-        if name not in self.default_threshold.keys():
-            assert threshold is not None, "Please enter threshold for hook{0}. ".format(name)
-        if threshold is not None:
-            self.threshold[name] = threshold
-
-    def delete_comparison_hook(self, name):
-
-        if name in self.comparison_fn_map.keys():
-            del self.comparison_fn_map[name]
-        if name in self.threshold.keys():
-            del self.threshold[name]
-
-    def compare(self, outputs, outputs_expected):
-        for name, each_compare in self.comparison_fn_map.items():
-            each_compare(outputs, outputs_expected, self.threshold[name])
-        logging.info(" ")
-
-    def update_threshold(self, name, threshold):
-        self.threshold[name] = threshold
-
-    def rollback_threshold(self):
-        self.threshold = self.default_threshold.copy()
-
-
-comparison_hook = ComparisonHook()
-
-
 def cos_comparison(outputs, outputs_expected, cos_threshold):
     assert isinstance(outputs, torch.Tensor)
     assert isinstance(outputs_expected, torch.Tensor)
@@ -77,8 +40,47 @@ def value_comparison(outputs, outputs_expected, value_threshold):
         "value_similarity={0}, value_threshold={1}".format(value_similarity, value_threshold)
 
 
-comparison_hook.register_comparison_hook('cos', cos_comparison)
-comparison_hook.register_comparison_hook('value', value_comparison)
+class ComparisonHook(object):
+
+    def __init__(self):
+        self.comparison_fn_map = {}
+        self.default_threshold = {'cos': 0.999,
+                                  'value': 0.01}
+        self.threshold = self.default_threshold.copy()
+
+    def register_comparison_hook(self, name, comparison_fn, threshold=None):
+        self.comparison_fn_map[name] = comparison_fn
+        if name not in self.default_threshold.keys():
+            assert threshold is not None, "Please enter threshold for hook{0}. ".format(name)
+        if threshold is not None:
+            self.threshold[name] = threshold
+
+    def delete_comparison_hook(self, name):
+        if name in self.comparison_fn_map.keys():
+            del self.comparison_fn_map[name]
+        if name in self.threshold.keys():
+            del self.threshold[name]
+
+    def update_threshold(self, name, threshold):
+        self.threshold[name] = threshold
+
+    def rollback_threshold(self):
+        self.threshold = self.default_threshold.copy()
+
+    def reset_default_hook(self):
+        self.comparison_fn_map = {}
+        self.threshold = self.default_threshold.copy()
+        comparison_hook.register_comparison_hook('cos', cos_comparison, self.default_threshold['cos'])
+        comparison_hook.register_comparison_hook('value', value_comparison, self.default_threshold['value'])
+
+    def compare(self, outputs, outputs_expected):
+        for name, each_compare in self.comparison_fn_map.items():
+            each_compare(outputs, outputs_expected, self.threshold[name])
+        logging.info(" ")
+
+
+comparison_hook = ComparisonHook()
+comparison_hook.reset_default_hook()
 
 
 def accuracy_comparison(outputs, outputs_expected):
