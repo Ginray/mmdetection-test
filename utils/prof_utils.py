@@ -14,7 +14,7 @@
 
 import os
 
-from utils.base_utils import DEVICE_INFO
+from utils.base_utils import device_info
 import logging
 import pandas as pd
 from datetime import datetime
@@ -24,7 +24,7 @@ import pytz
 def save_time(time_to_save, path):
     local_time = datetime.now(pytz.timezone('Asia/Shanghai'))
     time_format = "%Y-%m-%d %H:%M:%S"
-    data = {'date': [local_time.strftime(time_format)], 'device_info': DEVICE_INFO, 'one_step_time(s)': [time_to_save]}
+    data = {'date': [local_time.strftime(time_format)], 'device_info': device_info, 'one_step_time(s)': [time_to_save]}
     data = pd.DataFrame(data)
 
     if os.path.exists(path):
@@ -41,7 +41,7 @@ def save_time(time_to_save, path):
 def compare_with_best_time(time, path, time_threshold=0.1):
     assert os.path.exists(path)
     data_ori = pd.read_csv(path)
-    best_time = data_ori['one_step_time(s)'].loc[data_ori['device_info'] == DEVICE_INFO].min()
+    best_time = data_ori['one_step_time(s)'].loc[data_ori['device_info'] == device_info].min()
 
     gap = (time - best_time) / best_time
     logging.info('====> best_time={0}, gap={1}, time_threshold={2}'.format(best_time, gap, time_threshold))

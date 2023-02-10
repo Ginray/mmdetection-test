@@ -15,7 +15,7 @@
 import pytest
 import torch
 from mmdet.models.backbones.resnet import BasicBlock
-from utils.acc_utils import COMPARISON_HOOK
+from utils.acc_utils import comparison_hook
 from utils.base_utils import BaseUtil
 
 
@@ -28,7 +28,7 @@ class TestResnetTestCase:
         self.base_util.clear_output_list()
 
     def teardown_method(self):
-        COMPARISON_HOOK.rollback_threshold()
+        comparison_hook.rollback_threshold()
 
     @pytest.mark.acc
     def test_resnet_basic_block_acc(self):

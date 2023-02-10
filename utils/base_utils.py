@@ -17,12 +17,12 @@ import time
 from enum import IntEnum
 import logging
 
-DEVICE_INFO = 'UNKNOWN'
+device_info = 'UNKNOWN'
 
 
-def set_device_info(device_info):
-    global DEVICE_INFO
-    DEVICE_INFO = device_info
+def set_device_info(device_info_input):
+    global device_info
+    device_info = device_info_input
 
 
 class BaseUtil:

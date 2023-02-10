@@ -16,7 +16,7 @@ import pytest
 import torch
 
 from mmdet.models.roi_heads.roi_extractors import SingleRoIExtractor
-from utils.acc_utils import COMPARISON_HOOK
+from utils.acc_utils import comparison_hook
 from utils.base_utils import BaseUtil
 
 
@@ -34,7 +34,7 @@ class TestSingleRoIExtractorTestCase:
         self.base_util.clear_output_list()
 
     def teardown_method(self):
-        COMPARISON_HOOK.rollback_threshold()
+        comparison_hook.rollback_threshold()
 
     @pytest.mark.acc
     @pytest.mark.skip(reason='roi_align currently not supported on npu, fix it before 2023/03/31.')

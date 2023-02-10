@@ -15,7 +15,7 @@
 import pytest
 import torch
 from mmdet.models.necks import FPN
-from utils.acc_utils import COMPARISON_HOOK
+from utils.acc_utils import comparison_hook
 from utils.base_utils import BaseUtil
 
 
@@ -38,7 +38,7 @@ class TestFPNTestCase:
         self.base_util.clear_output_list()
 
     def teardown_method(self):
-        COMPARISON_HOOK.rollback_threshold()
+        comparison_hook.rollback_threshold()
 
     @pytest.mark.acc
     def test_fpn_acc(self):
@@ -50,7 +50,7 @@ class TestFPNTestCase:
             for i in range(len(self.in_channels))
         ]
 
-        COMPARISON_HOOK.update_threshold('value', 0.015)
+        comparison_hook.update_threshold('value', 0.015)
         self.base_util.run_and_compare_acc(self.fpn_model, 'FPN', inputs=feats)
 
     @pytest.mark.prof

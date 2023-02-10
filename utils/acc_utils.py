@@ -50,7 +50,7 @@ class ComparisonHook(object):
         self.threshold = self.default_threshold.copy()
 
 
-COMPARISON_HOOK = ComparisonHook()
+comparison_hook = ComparisonHook()
 
 
 def cos_comparison(outputs, outputs_expected, cos_threshold):
@@ -77,8 +77,8 @@ def value_comparison(outputs, outputs_expected, value_threshold):
         "value_similarity={0}, value_threshold={1}".format(value_similarity, value_threshold)
 
 
-COMPARISON_HOOK.register_comparison_hook('cos', cos_comparison)
-COMPARISON_HOOK.register_comparison_hook('value', value_comparison)
+comparison_hook.register_comparison_hook('cos', cos_comparison)
+comparison_hook.register_comparison_hook('value', value_comparison)
 
 
 def accuracy_comparison(outputs, outputs_expected):
@@ -91,8 +91,8 @@ def accuracy_comparison(outputs, outputs_expected):
             if isinstance(each_output, tuple) and isinstance(each_output_expected, tuple):
                 # used to compare gradients.
                 for each_tuple_val in zip(each_output, each_output_expected):
-                    COMPARISON_HOOK.compare(each_tuple_val[0].cpu(), each_tuple_val[1].cpu())
+                    comparison_hook.compare(each_tuple_val[0].cpu(), each_tuple_val[1].cpu())
             else:
-                COMPARISON_HOOK.compare(each_output.cpu(), each_output_expected.cpu())
+                comparison_hook.compare(each_output.cpu(), each_output_expected.cpu())
     else:
         raise NotImplementedError('Only supports Tensor and list of Tensor.')
