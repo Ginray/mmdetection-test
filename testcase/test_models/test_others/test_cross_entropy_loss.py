@@ -59,8 +59,8 @@ class TestCrossEntropyLossTestCase:
         self.loss.register_forward_hook(self.base_util.base_hook_forward_fn)
         self.loss.register_backward_hook(self.base_util.base_hook_backward_fn)
 
-        cls_score = torch.rand([3, 5])
-        label = torch.tensor([1, 0, 4])
+        cls_score = torch.rand([15, 10])
+        label = torch.tensor([1, 0, 4, 8, 4, 7, 9, 3, 2, 5, 3, 6, 2, 7, 9])
 
         comparison_hook.delete_comparison_hook('cos')
         comparison_hook.register_comparison_hook('cos_dim_0', cos_comparison_dim_0, threshold=0.999)
