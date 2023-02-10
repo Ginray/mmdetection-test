@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from utils.base_utils import LOGGING_LEVEL, LoggingLevel
 import torch
+import logging
 
 cos = torch.nn.CosineSimilarity(dim=1)
 
@@ -34,8 +34,7 @@ class ComparisonHook(object):
     def compare(self, outputs, outputs_expected):
         for name, each_compare in self.comparison_fn_map.items():
             each_compare(outputs, outputs_expected, self.threshold[name])
-        if LOGGING_LEVEL <= LoggingLevel.info:
-            print()
+        logging.info(" ")
 
     def update_threshold(self, name, threshold):
         self.threshold[name] = threshold
@@ -56,8 +55,7 @@ def cos_comparison(outputs, outputs_expected, cos_threshold):
         outputs = outputs * scale
         outputs_expected = outputs_expected * scale
     cosine_similarity = cos(outputs, outputs_expected).min()
-    if LOGGING_LEVEL <= LoggingLevel.info:
-        print('=====> cosine_similarity={0}, cos_threshold={1}'.format(cosine_similarity, cos_threshold))
+    logging.info('==> cosine_similarity={0}, cos_threshold={1}'.format(cosine_similarity, cos_threshold))
     assert cosine_similarity >= cos_threshold, \
         "cosine_similarity={0}, cos_threshold={1}".format(cosine_similarity, cos_threshold)
 
@@ -66,8 +64,7 @@ def value_comparison(outputs, outputs_expected, value_threshold):
     assert isinstance(outputs, torch.Tensor)
     assert isinstance(outputs_expected, torch.Tensor)
     value_similarity = (outputs - outputs_expected).abs().max()
-    if LOGGING_LEVEL <= LoggingLevel.info:
-        print('=======> value_similarity={0}, value_threshold={1}'.format(value_similarity, value_threshold))
+    logging.info('====> value_similarity={0}, value_threshold={1}'.format(value_similarity, value_threshold))
     assert value_similarity <= value_threshold, \
         "value_similarity={0}, value_threshold={1}".format(value_similarity, value_threshold)
 

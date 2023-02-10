@@ -14,7 +14,8 @@
 
 import os
 
-from utils.base_utils import LOGGING_LEVEL, DEVICE_INFO, LoggingLevel
+from utils.base_utils import DEVICE_INFO
+import logging
 import pandas as pd
 from datetime import datetime
 import pytz
@@ -43,8 +44,7 @@ def compare_with_best_time(time, path, time_threshold=0.1):
     best_time = data_ori['one_step_time(s)'].loc[data_ori['device_info'] == DEVICE_INFO].min()
 
     gap = (time - best_time) / best_time
-    if LOGGING_LEVEL <= LoggingLevel.info:
-        print('=====> best_time={0}, gap={1}, time_threshold={2}'.format(best_time, gap, time_threshold))
+    logging.info('====> best_time={0}, gap={1}, time_threshold={2}'.format(best_time, gap, time_threshold))
 
     assert gap <= time_threshold, \
         "compare_with_best_time, best_time={0}, gap={1}, time_threshold={2}".format(best_time, gap, time_threshold)
