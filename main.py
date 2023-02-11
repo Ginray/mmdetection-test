@@ -67,7 +67,8 @@ test_cases = [
     "./testcase/test_models/test_necks/test_fpn.py",
     "./testcase/test_models/test_heads/test_single_roi_extractor.py",
     "./testcase/test_models/test_heads/test_shared2FCB_box_head.py",
-    "./testcase/test_models/test_others/test_cross_entropy_loss.py"
+    "./testcase/test_others/test_cross_entropy_loss.py",
+    "./testcase/test_others/test_maxIoU_assigner.py"
 ]
 
 
@@ -77,11 +78,11 @@ def main():
     set_device_info(args.device)
     set_seed()
     if args.scope == "all":
-        pytest.main(["-s", "./testcase/test_models/"])
+        pytest.main(["-s", "./testcase/"])
     elif args.scope == "acc":
-        pytest.main(["-m acc ", "-s", "./testcase/test_models/"])
+        pytest.main(["-m acc ", "-s", "./testcase/"])
     elif args.scope == "prof":
-        pytest.main(["-m prof ", "-s", "./testcase/test_models/"])
+        pytest.main(["-m prof ", "-s", "./testcase/"])
     elif args.scope == "single":
         pytest.main(["-s", test_cases[args.case_id]])
 
