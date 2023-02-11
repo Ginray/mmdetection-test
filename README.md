@@ -26,14 +26,12 @@ python3 main.py --device=910B  --scope=single --case_id=4    # Test the case wit
 | module name   | performance | accuracy |
 |--------| ----------- | -------- |
 | ResNet | ✔           | ✔       |
-|        |             |          |
 
 ### necks:
 
 | module name   | performance | accuracy |
 | ------------------ | ----------- | -------- |
 | FPN | ✔           | ✔       |
-|                    |             |          |
 
 ### heads:
 
@@ -41,11 +39,10 @@ python3 main.py --device=910B  --scope=single --case_id=4    # Test the case wit
 |--------------------| ----------- | -------- |
 | Shared2FCBBoxHead  | ✔           | ✔       |
 | SingleRoIExtractor | ❌          | ❌       |
-|                    |             |          |
 
 ### others:
 
 | module name      | performance | accuracy |
-| ---------------- | ----------- | -------- |
+|------------------| ----------- | -------- |
 | CrossEntropyLoss | ✔           | ✔        |
-|                  |             |          |
+| MaxIoUAssigner   | ✔          |  ✔      |

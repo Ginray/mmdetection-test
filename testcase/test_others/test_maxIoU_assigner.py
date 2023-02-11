@@ -37,6 +37,7 @@ class MaxIoUAssignerModule(Module):
 def cos_comparison_dim_0(outputs, outputs_expected, cos_threshold):
     assert isinstance(outputs, torch.Tensor)
     assert isinstance(outputs_expected, torch.Tensor)
+    outputs, outputs_expected = outputs.float(), outputs_expected.float()
     cos = torch.nn.CosineSimilarity(dim=0)
     max_value_of_output = outputs_expected.max()
     if max_value_of_output < 1.0:
