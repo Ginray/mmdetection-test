@@ -77,7 +77,6 @@ class BaseUtil:
         return input
 
     def run_step(self, module, **input):
-        module = module.to(self._device)
         input = self.set_input_to_device(**input)
         output = module(**input)
         if isinstance(output, tuple):
@@ -101,10 +100,13 @@ class BaseUtil:
         from utils.acc_utils import accuracy_comparison
 
         self.set_device('cpu')
+        module = module.to(self._device)
         logging.info('module {0} start executing on the cpu. '.format(module_name))
         self.run_step(module, **input)
-        logging.info('module {0} start executing on the npu. '.format(module_name))
+
         self.set_device('npu')
+        module = module.to(self._device)
+        logging.info('module {0} start executing on the npu. '.format(module_name))
         self.run_step(module, **input)
 
         logging.info('start compare forward, module_name={0}'.format(module_name))
@@ -118,8 +120,31 @@ class BaseUtil:
 
         time_start = time.time()
         self.set_device('npu')
+        module = module.to(self._device)
         self.run_step(module, **input)
         time_one_step = time.time() - time_start
 
         save_time(time_one_step, prof_path)
         compare_with_best_time(time_one_step, prof_path, time_threshold=time_threshold)
+
+    def run_and_compare_parameters(self, module, module_name=None, **input):
+        from utils.acc_utils import accuracy_comparison
+        import copy
+
+        cpu_module = module.to('cpu')
+        npu_module = copy.deepcopy(module).to('npu')
+
+        self.set_device('cpu')
+        logging.info('compare_parameters, module {0} start executing on the cpu. '.format(module_name))
+        self.run_step(cpu_module, **input)
+
+        self.set_device('npu')
+        logging.info('compare_parameters, module {0} start executing on the npu. '.format(module_name))
+        self.run_step(npu_module, **input)
+
+        for (npu_para_name, npu_para), (cpu_para_name, cpu_para) in \
+                zip(npu_module.named_parameters(), cpu_module.named_parameters()):
+            logging.debug('compare_parameters, para_name={} '.format(npu_para_name))
+            assert npu_para_name == cpu_para_name
+            accuracy_comparison(npu_para, cpu_para)
+            accuracy_comparison(npu_para.grad, cpu_para.grad)

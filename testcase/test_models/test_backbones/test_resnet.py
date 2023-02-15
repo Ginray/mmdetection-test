@@ -15,7 +15,7 @@
 import pytest
 import torch
 from mmdet.models.backbones.resnet import BasicBlock
-from utils.acc_utils import comparison_hook, accuracy_comparison
+from utils.acc_utils import comparison_hook, accuracy_comparison, cos_comparison_dim_0
 from utils.base_utils import BaseUtil
 
 
@@ -28,14 +28,17 @@ class TestResnetTestCase:
         self.base_util.clear_output_list()
 
     def teardown_method(self):
-        comparison_hook.rollback_threshold()
+        comparison_hook.reset_default_hook()
 
     @pytest.mark.acc
     def test_resnet_basic_block_parameters(self):
-        cpu_block = BasicBlock(3, 3)
-        # input = torch.load('./data/pt_dump/backbones/resnet/Resnet_input.pt', map_location=torch.device('cpu'))
-        for npu_para, cpu_para in zip(npu_block.parameters(), cpu_block.parameters()):
-            accuracy_comparison(npu_para, cpu_para)
+        comparison_hook.update_threshold('value', 0.02)
+        comparison_hook.delete_comparison_hook('cos')
+        comparison_hook.register_comparison_hook('cos_dim_0', cos_comparison_dim_0, threshold=0.99)
+
+        self.block = BasicBlock(3, 3)
+        input = torch.load('./data/pt_dump/backbones/resnet/Resnet_input.pt', map_location=torch.device('cpu'))
+        self.base_util.run_and_compare_parameters(self.block, 'Resnet', x=input)
 
     @pytest.mark.acc
     def test_resnet_basic_block_acc(self):

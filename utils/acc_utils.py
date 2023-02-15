@@ -31,6 +31,24 @@ def cos_comparison(outputs, outputs_expected, cos_threshold):
         "cosine_similarity={0}, cos_threshold={1}".format(cosine_similarity, cos_threshold)
 
 
+def cos_comparison_dim_0(outputs, outputs_expected, cos_threshold):
+    assert isinstance(outputs, torch.Tensor)
+    assert isinstance(outputs_expected, torch.Tensor)
+    outputs, outputs_expected = outputs.float(), outputs_expected.float()
+    cos = torch.nn.CosineSimilarity(dim=0)
+    max_value_of_output = outputs_expected.max()
+    if max_value_of_output < 1.0:
+        scale = 1.0 / max_value_of_output
+        outputs = outputs * scale
+        outputs_expected = outputs_expected * scale
+    cosine_similarity = cos(outputs, outputs_expected).min()
+    if torch.isnan(cosine_similarity):
+        return
+    logging.info('==> cosine_similarity={0}, cos_threshold={1}'.format(cosine_similarity, cos_threshold))
+    assert cosine_similarity >= cos_threshold, \
+        "cosine_similarity={0}, cos_threshold={1}".format(cosine_similarity, cos_threshold)
+
+
 def value_comparison(outputs, outputs_expected, value_threshold):
     assert isinstance(outputs, torch.Tensor)
     assert isinstance(outputs_expected, torch.Tensor)

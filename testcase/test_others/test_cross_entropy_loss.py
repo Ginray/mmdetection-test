@@ -16,23 +16,8 @@ import pytest
 import torch
 import logging
 from mmdet.models.losses import CrossEntropyLoss
-from utils.acc_utils import comparison_hook
+from utils.acc_utils import comparison_hook, cos_comparison_dim_0
 from utils.base_utils import BaseUtil
-
-
-def cos_comparison_dim_0(outputs, outputs_expected, cos_threshold):
-    assert isinstance(outputs, torch.Tensor)
-    assert isinstance(outputs_expected, torch.Tensor)
-    cos = torch.nn.CosineSimilarity(dim=0)
-    max_value_of_output = outputs_expected.max()
-    if max_value_of_output < 1.0:
-        scale = 1.0 / max_value_of_output
-        outputs = outputs * scale
-        outputs_expected = outputs_expected * scale
-    cosine_similarity = cos(outputs, outputs_expected).min()
-    logging.info('==> cosine_similarity={0}, cos_threshold={1}'.format(cosine_similarity, cos_threshold))
-    assert cosine_similarity >= cos_threshold, \
-        "cosine_similarity={0}, cos_threshold={1}".format(cosine_similarity, cos_threshold)
 
 
 class TestCrossEntropyLossTestCase:
