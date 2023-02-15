@@ -15,7 +15,7 @@
 import pytest
 import torch
 from mmdet.models.backbones.resnet import BasicBlock
-from utils.acc_utils import comparison_hook, accuracy_comparison, cos_comparison_dim_0
+from utils.acc_utils import comparison_hook, cos_comparison_dim_0
 from utils.base_utils import BaseUtil
 
 
