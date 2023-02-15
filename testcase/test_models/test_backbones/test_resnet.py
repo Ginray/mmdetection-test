@@ -38,9 +38,26 @@ class TestResnetTestCase:
         input = torch.rand(1, 64, 56, 56)
         self.base_util.run_and_compare_acc(self.block, 'Resnet', x=input)
 
+    def test_resnet_basic_block_acc_2(self):
+        self.block.register_forward_hook(self.base_util.base_hook_forward_fn)
+        self.block.register_backward_hook(self.base_util.base_hook_backward_fn)
+
+        # todo 所有路径统一到配置文件中
+        self.block = BasicBlock(3, 3)
+        input = torch.load('./data/pt_dump/backbones/resnet/Resnet_input.pt')
+        self.base_util.run_and_compare_acc(self.block, 'Resnet', x=input)
+
     @pytest.mark.prof
     def test_resnet_basic_block_prof(self):
         # test BasicBlock structure and forward
+        self.block = BasicBlock(64, 64)
         input = torch.rand(1, 64, 56, 56)
         prof_path = './data/prof_time_summary/backbones/resnet/resnet_prof.csv'
+        self.base_util.run_and_compare_prof(self.block, prof_path, time_threshold=0.4, x=input)
+
+    @pytest.mark.prof
+    def test_resnet_basic_block_prof_2(self):
+        self.block = BasicBlock(3, 3)
+        input = torch.load('./data/pt_dump/backbones/resnet/Resnet_input.pt')
+        prof_path = './data/prof_time_summary/backbones/resnet/resnet_prof_dump.csv'
         self.base_util.run_and_compare_prof(self.block, prof_path, time_threshold=0.4, x=input)

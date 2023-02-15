@@ -47,7 +47,7 @@ python3 main.py --device=910B  --scope=single --case_id=4    # Test the case wit
 | CrossEntropyLoss | ✔           | ✔        |
 | MaxIoUAssigner   | ✔          |  ✔      |
 
-## ToDoList :
+## ToDoList:
 
 + 使用真实数据save/load进行测试
 + 使用公共磁盘/对象存储保存pt文件
