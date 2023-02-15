@@ -44,7 +44,7 @@ class TestResnetTestCase:
 
         # todo 所有路径统一到配置文件中
         self.block = BasicBlock(3, 3)
-        input = torch.load('./data/pt_dump/backbones/resnet/Resnet_input.pt')
+        input = torch.load('./data/pt_dump/backbones/resnet/Resnet_input.pt', map_location=torch.device('cpu'))
         self.base_util.run_and_compare_acc(self.block, 'Resnet', x=input)
 
     @pytest.mark.prof
@@ -58,6 +58,6 @@ class TestResnetTestCase:
     @pytest.mark.prof
     def test_resnet_basic_block_prof_2(self):
         self.block = BasicBlock(3, 3)
-        input = torch.load('./data/pt_dump/backbones/resnet/Resnet_input.pt')
+        input = torch.load('./data/pt_dump/backbones/resnet/Resnet_input.pt', map_location=torch.device('cpu'))
         prof_path = './data/prof_time_summary/backbones/resnet/resnet_prof_dump.csv'
         self.base_util.run_and_compare_prof(self.block, prof_path, time_threshold=0.4, x=input)
