@@ -15,7 +15,7 @@
 import pytest
 import torch
 from mmdet.models.backbones.resnet import BasicBlock
-from utils.acc_utils import comparison_hook
+from utils.acc_utils import comparison_hook, accuracy_comparison
 from utils.base_utils import BaseUtil
 
 
@@ -31,6 +31,13 @@ class TestResnetTestCase:
         comparison_hook.rollback_threshold()
 
     @pytest.mark.acc
+    def test_resnet_basic_block_parameters(self):
+        cpu_block = BasicBlock(3, 3)
+        # input = torch.load('./data/pt_dump/backbones/resnet/Resnet_input.pt', map_location=torch.device('cpu'))
+        for npu_para, cpu_para in zip(npu_block.parameters(), cpu_block.parameters()):
+            accuracy_comparison(npu_para, cpu_para)
+
+    @pytest.mark.acc
     def test_resnet_basic_block_acc(self):
         self.block.register_forward_hook(self.base_util.base_hook_forward_fn)
         self.block.register_backward_hook(self.base_util.base_hook_backward_fn)
@@ -38,6 +45,7 @@ class TestResnetTestCase:
         input = torch.rand(1, 64, 56, 56)
         self.base_util.run_and_compare_acc(self.block, 'Resnet', x=input)
 
+    @pytest.mark.acc
     def test_resnet_basic_block_acc_2(self):
         self.block.register_forward_hook(self.base_util.base_hook_forward_fn)
         self.block.register_backward_hook(self.base_util.base_hook_backward_fn)
