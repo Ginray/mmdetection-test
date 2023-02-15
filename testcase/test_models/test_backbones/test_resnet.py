@@ -45,6 +45,7 @@ class TestResnetTestCase:
         self.block.register_forward_hook(self.base_util.base_hook_forward_fn)
         self.block.register_backward_hook(self.base_util.base_hook_backward_fn)
 
+        self.block = BasicBlock(64, 64)
         input = torch.rand(1, 64, 56, 56)
         self.base_util.run_and_compare_acc(self.block, 'Resnet', x=input)
 
