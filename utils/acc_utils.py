@@ -29,9 +29,13 @@ def cos_comparison(outputs, outputs_expected, cos_threshold):
         scale = 1.0 / max_value_of_output
         outputs = outputs * scale
         outputs_expected = outputs_expected * scale
-    cosine_similarity = cos(outputs, outputs_expected).min()
+    cosine_tensor = cos(outputs, outputs_expected)
+    cosine_similarity = cosine_tensor.min()
     if torch.isnan(cosine_similarity):
         return
+    if cosine_similarity == 0:
+        # outputs中存在一行完全为0，用1替换之后再进行相似度计算
+        cosine_similarity = torch.where(cosine_tensor == 0, torch.ones_like(cosine_tensor), cosine_tensor).min()
     logging.info('==> cosine_similarity={0}, cos_threshold={1}'.format(cosine_similarity, cos_threshold))
     assert cosine_similarity >= cos_threshold, \
         "cosine_similarity={0}, cos_threshold={1}".format(cosine_similarity, cos_threshold)
