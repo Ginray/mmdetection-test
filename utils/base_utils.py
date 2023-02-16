@@ -55,9 +55,9 @@ class BaseUtil:
     def base_hook_backward_fn(self, module, grad_in, grad_out):
         logging.debug('backward,use {0}: module={1}'.format(self._device, module))
         if self._device == 'npu':
-            self.npu_grad_list.append(grad_out)
+            self.npu_grad_list.append(grad_in)
         elif self._device == 'cpu':
-            self.cpu_grad_list.append(grad_out)
+            self.cpu_grad_list.append(grad_in)
         else:
             raise ValueError
 

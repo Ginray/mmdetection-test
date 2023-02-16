@@ -16,7 +16,7 @@ import pytest
 import torch
 import logging
 from mmdet.models.losses import CrossEntropyLoss
-from utils.acc_utils import comparison_hook, cos_comparison_dim_0
+from utils.acc_utils import comparison_hook
 from utils.base_utils import BaseUtil
 
 
@@ -47,8 +47,6 @@ class TestCrossEntropyLossTestCase:
         cls_score = torch.rand([15, 10])
         label = torch.tensor([1, 0, 4, 8, 4, 7, 9, 3, 2, 5, 3, 6, 2, 7, 9])
 
-        comparison_hook.delete_comparison_hook('cos')
-        comparison_hook.register_comparison_hook('cos_dim_0', cos_comparison_dim_0, threshold=0.999)
         self.base_util.run_and_compare_acc(self.loss, 'cross_entropy', cls_score=cls_score, label=label)
 
     @pytest.mark.prof

@@ -16,7 +16,7 @@ import pytest
 import torch
 import logging
 from mmdet.core.bbox import MaxIoUAssigner
-from utils.acc_utils import comparison_hook, cos_comparison_dim_0
+from utils.acc_utils import comparison_hook
 from utils.base_utils import BaseUtil
 from torch.nn import Module
 
@@ -49,8 +49,6 @@ class TestMaxIoUAssignerTestCase:
     def test_maxIoU_assigner_acc(self):
         self.maxIoU_assigner.register_forward_hook(self.base_util.base_hook_forward_fn)
         self.maxIoU_assigner.register_backward_hook(self.base_util.base_hook_backward_fn)
-        comparison_hook.delete_comparison_hook('cos')
-        comparison_hook.register_comparison_hook('cos_dim_0', cos_comparison_dim_0, threshold=0.999)
 
         bboxes = torch.Tensor([[0, 0, 10, 10], [10, 10, 20, 20],
                                [3, 3, 6, 6], [2, 2, 3, 3]])
