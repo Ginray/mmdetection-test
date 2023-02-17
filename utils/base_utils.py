@@ -106,7 +106,7 @@ class BaseUtil:
             if auto_backward:
                 output[0].mean().backward()
         elif isinstance(output, torch.Tensor):
-            if output.dtype != torch.int:
+            if output.dtype != torch.float:
                 logging.warning('output.dtype is {0}, set to float.'.format(output.dtype))
                 output = output.float()
             if not output.requires_grad:

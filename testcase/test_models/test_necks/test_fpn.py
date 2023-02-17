@@ -51,7 +51,7 @@ class TestFPNTestCase:
         self.base_util.run_and_compare_acc(self.fpn_model, 'FPN', inputs=feats)
 
     @pytest.mark.acc
-    def test_resnet_basic_block_acc_real(self):
+    def test_fpn_basic_block_acc_real(self):
         self.fpn_model = FPN(
             in_channels=[256, 512, 1024, 2048],
             out_channels=256,
