@@ -41,9 +41,6 @@ class TestCrossEntropyLossTestCase:
 
     @pytest.mark.acc
     def test_cross_entropy_acc(self):
-        self.loss.register_forward_hook(self.base_util.base_hook_forward_fn)
-        self.loss.register_backward_hook(self.base_util.base_hook_backward_fn)
-
         cls_score = torch.rand([15, 10])
         label = torch.tensor([1, 0, 4, 8, 4, 7, 9, 3, 2, 5, 3, 6, 2, 7, 9])
 

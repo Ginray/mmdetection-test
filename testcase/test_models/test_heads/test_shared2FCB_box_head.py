@@ -50,9 +50,6 @@ class TestShared2FCBBoxHeadTestCase:
 
     @pytest.mark.acc
     def test_shared2FCB_box_acc(self):
-        self.box_head.register_forward_hook(self.base_util.base_hook_forward_fn)
-        self.box_head.register_backward_hook(self.base_util.base_hook_backward_fn)
-
         input = torch.rand(1, 256, 7, 7)
         self.base_util.run_and_compare_acc(self.box_head, 'Shared2FCB', x=input)
 

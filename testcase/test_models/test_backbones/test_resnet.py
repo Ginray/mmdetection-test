@@ -41,20 +41,16 @@ class TestResnetTestCase:
 
     @pytest.mark.acc
     def test_resnet_basic_block_acc(self):
-        self.block.register_forward_hook(self.base_util.base_hook_forward_fn)
-        self.block.register_backward_hook(self.base_util.base_hook_backward_fn)
-
         self.block = BasicBlock(64, 64)
+
         input = torch.rand(1, 64, 56, 56)
         self.base_util.run_and_compare_acc(self.block, 'Resnet', x=input)
 
     @pytest.mark.acc
     def test_resnet_basic_block_acc_2(self):
-        self.block.register_forward_hook(self.base_util.base_hook_forward_fn)
-        self.block.register_backward_hook(self.base_util.base_hook_backward_fn)
+        self.block = BasicBlock(3, 3)
 
         # todo 所有路径统一到配置文件中
-        self.block = BasicBlock(3, 3)
         input = torch.load('./data/pt_dump/backbones/resnet/Resnet_input.pt', map_location=torch.device('cpu'))
         self.base_util.run_and_compare_acc(self.block, 'Resnet', x=input)
 

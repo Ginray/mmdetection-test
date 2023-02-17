@@ -42,9 +42,6 @@ class TestFPNTestCase:
 
     @pytest.mark.acc
     def test_fpn_acc(self):
-        self.fpn_model.register_forward_hook(self.base_util.base_hook_forward_fn)
-        self.fpn_model.register_backward_hook(self.base_util.base_hook_backward_fn)
-
         feats = [
             torch.rand(1, self.in_channels[i], self.feat_sizes[i], self.feat_sizes[i])
             for i in range(len(self.in_channels))
@@ -52,6 +49,24 @@ class TestFPNTestCase:
 
         comparison_hook.update_threshold('value', 0.015)
         self.base_util.run_and_compare_acc(self.fpn_model, 'FPN', inputs=feats)
+
+    @pytest.mark.acc
+    def test_resnet_basic_block_acc_real(self):
+        self.fpn_model = FPN(
+            in_channels=[256, 512, 1024, 2048],
+            out_channels=256,
+            num_outs=5,
+            start_level=0,
+            end_level=-1)
+        comparison_hook.update_threshold('value', 0.03)
+        comparison_hook.delete_comparison_hook('cos')
+
+        pt_path = './data/pt_dump/necks/fpn/'
+        forward_input = torch.load(pt_path + 'fpn_forward_input.pt', map_location=torch.device('cpu'))
+        backward_output = torch.load(pt_path + 'fpn_backward_output.pt', map_location=torch.device('cpu'))
+
+        self.base_util.run_and_compare_real_data(self.fpn_model, 'FPN', forward_input=dict(inputs=forward_input),
+                                                 backward_output=backward_output)
 
     @pytest.mark.prof
     def test_fpn_prof(self):

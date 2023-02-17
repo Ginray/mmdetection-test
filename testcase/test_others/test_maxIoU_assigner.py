@@ -47,9 +47,6 @@ class TestMaxIoUAssignerTestCase:
 
     @pytest.mark.acc
     def test_maxIoU_assigner_acc(self):
-        self.maxIoU_assigner.register_forward_hook(self.base_util.base_hook_forward_fn)
-        self.maxIoU_assigner.register_backward_hook(self.base_util.base_hook_backward_fn)
-
         bboxes = torch.Tensor([[0, 0, 10, 10], [10, 10, 20, 20],
                                [3, 3, 6, 6], [2, 2, 3, 3]])
         gt_bboxes = torch.Tensor([[0, 0, 10, 9], [10, 10, 19, 19],

@@ -39,9 +39,6 @@ class TestSingleRoIExtractorTestCase:
     @pytest.mark.acc
     @pytest.mark.skip(reason='roi_align currently not supported on npu, fix it before 2023/03/31.')
     def test_roi_extractor_acc(self):
-        self.roi_extractor.register_forward_hook(self.base_util.base_hook_forward_fn)
-        self.roi_extractor.register_backward_hook(self.base_util.base_hook_backward_fn)
-
         feats = (
             torch.rand((1, 256, 200, 336)),
             torch.rand((1, 256, 100, 168)),
