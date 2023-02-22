@@ -118,7 +118,7 @@ class BaseUtil:
             raise NotImplementedError('[run_step] {0} is currently not supported. '.format(type(output)))
         return output
 
-    def run_and_compare_acc(self, module, module_name, *input):
+    def run_and_compare_with_cpu_acc(self, module, module_name, *input):
         from utils.acc_utils import accuracy_comparison
         cpu_module = module
         npu_module = copy.deepcopy(module).to('npu')
@@ -154,7 +154,7 @@ class BaseUtil:
         save_time(time_one_step, prof_path)
         compare_with_best_time(time_one_step, prof_path, time_threshold=time_threshold)
 
-    def run_and_compare_parameters(self, module, module_name=None, *input):
+    def run_and_compare_with_cpu_parameters(self, module, module_name=None, *input):
         from utils.acc_utils import accuracy_comparison
 
         cpu_module = module

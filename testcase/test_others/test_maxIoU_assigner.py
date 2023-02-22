@@ -52,7 +52,7 @@ class TestMaxIoUAssignerTestCase:
         gt_bboxes = torch.Tensor([[0, 0, 10, 9], [10, 10, 19, 19],
                                   [10, 10, 15, 15], [3, 3, 4, 4]])
 
-        self.base_util.run_and_compare_acc(self.maxIoU_assigner, 'maxIoU_assigner', bboxes, gt_bboxes)
+        self.base_util.run_and_compare_with_cpu_acc(self.maxIoU_assigner, 'maxIoU_assigner', bboxes, gt_bboxes)
 
     @pytest.mark.prof
     def test_maxIoU_assigner_prof(self):

@@ -51,7 +51,7 @@ class TestShared2FCBBoxHeadTestCase:
     @pytest.mark.acc
     def test_shared2FCB_box_acc(self):
         input = torch.rand(1, 256, 7, 7)
-        self.base_util.run_and_compare_acc(self.box_head, 'Shared2FCB', input)
+        self.base_util.run_and_compare_with_cpu_acc(self.box_head, 'Shared2FCB', input)
 
     @pytest.mark.prof
     def test_shared2FCB_box_prof(self):

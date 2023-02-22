@@ -47,7 +47,7 @@ class TestSingleRoIExtractorTestCase:
         )
         rois = torch.tensor([[0.0000, 587.8285, 52.1405, 886.2484, 341.5644]])
 
-        self.base_util.run_and_compare_acc(self.roi_extractor, 'RoIExtractor', feats, rois)
+        self.base_util.run_and_compare_with_cpu_acc(self.roi_extractor, 'RoIExtractor', feats, rois)
 
     @pytest.mark.prof
     @pytest.mark.skip(reason='roi_align currently not supported on npu, fix it before 2023/03/31.')

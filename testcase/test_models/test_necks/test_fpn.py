@@ -46,7 +46,7 @@ class TestFPNTestCase:
             torch.rand(1, self.in_channels[i], self.feat_sizes[i], self.feat_sizes[i])
             for i in range(len(self.in_channels))
         ]
-        self.base_util.run_and_compare_acc(self.fpn_model, 'FPN', feats)
+        self.base_util.run_and_compare_with_cpu_acc(self.fpn_model, 'FPN', feats)
 
     @pytest.mark.acc
     def test_fpn_basic_block_acc_real_data(self):
