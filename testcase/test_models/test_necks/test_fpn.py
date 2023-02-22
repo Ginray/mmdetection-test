@@ -55,7 +55,7 @@ class TestFPNTestCase:
 
         config = torch.load(pt_path + 'fpn_dump.pth', map_location=torch.device('cpu'))
         fpn_model = self.base_util.set_params_from_config(fpn_model, config)
-        self.base_util.run_and_compare_real_data(fpn_model, 'FPN', config)
+        self.base_util.run_and_compare_with_real_data_acc(fpn_model, 'FPN', config)
 
     @pytest.mark.prof
     def test_fpn_prof(self):

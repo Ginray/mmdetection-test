@@ -76,17 +76,9 @@ class BaseUtil:
         return value
 
     def do_real_data_backward(self, output, backward_output):
-        if isinstance(backward_output, tuple):
-            backward_output = (each_output.to(self._device) for each_output in backward_output)
-        elif isinstance(backward_output, list):
-            backward_output = [each_output.to(self._device) for each_output in backward_output]
-        elif isinstance(backward_output, torch.Tensor):
-            backward_output = backward_output.to(self._device)
-        else:
-            raise NotImplementedError(
-                '[do_real_data_backward] {0} is currently not supported. '.format(type(backward_output)))
+        backward_output = self.set_value_to_device(backward_output)
 
-        if isinstance(output, tuple):
+        if isinstance(output, tuple) or isinstance(output, list):
             for each_output in output:
                 each_output.backward(backward_output)
         elif isinstance(output, torch.Tensor):
@@ -187,7 +179,7 @@ class BaseUtil:
         module.__dict__["_is_full_backward_hook"] = True
         return module
 
-    def run_and_compare_real_data(self, module, module_name, config):
+    def run_and_compare_with_real_data_acc(self, module, module_name, config):
         forward_input = config['forward']['inputs']
         backward_output = config['backward']['outputs']
         target_forward_output = config['forward']['outputs']
@@ -206,7 +198,8 @@ class BaseUtil:
 
         if backward_output:
             logging.info('start compare backward, module_name={0}'.format(module_name))
+            npu_module.register_full_backward_hook(self.base_hook_backward_fn)
             self.do_real_data_backward(output_npu, backward_output)
-            # todo compare
+            accuracy_comparison(self.npu_grad_list, target_backward_input)
         else:
-            logging.info('backward_output is empty')
+            logging.info('compare with real_data, backward_output is empty.')
