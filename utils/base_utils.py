@@ -62,20 +62,18 @@ class BaseUtil:
         else:
             raise ValueError
 
-    def set_input_to_device(self, **input):
-        for key, value in input.items():
-            if isinstance(value, torch.Tensor):
-                value = value.to(self._device)
-            elif isinstance(value, list):
-                value_list = [each_value.to(self._device) for each_value in value]
-                value = value_list
-            elif isinstance(value, tuple):
-                value_tuple = tuple(each_value.to(self._device) for each_value in value)
-                value = value_tuple
-            else:
-                raise NotImplementedError('[set_input_to_device] {0} is currently not supported. '.format(type(value)))
-            input[key] = value
-        return input
+    def set_value_to_device(self, value):
+        if isinstance(value, torch.Tensor):
+            value = value.to(self._device)
+        elif isinstance(value, list):
+            value_list = [self.set_value_to_device(each_value) for each_value in value]
+            value = value_list
+        elif isinstance(value, tuple):
+            value_tuple = tuple(self.set_value_to_device(each_value) for each_value in value)
+            value = value_tuple
+        else:
+            raise NotImplementedError('[set_value_to_device] {0} is currently not supported. '.format(type(value)))
+        return value
 
     def do_real_data_backward(self, output, backward_output):
         if isinstance(backward_output, tuple):
@@ -89,16 +87,18 @@ class BaseUtil:
                 '[do_real_data_backward] {0} is currently not supported. '.format(type(backward_output)))
 
         if isinstance(output, tuple):
-            output[0].backward(backward_output)
+            for each_output in output:
+                each_output.backward(backward_output)
         elif isinstance(output, torch.Tensor):
             output.backward(backward_output)
         else:
             raise NotImplementedError(
                 '[do_real_data_backward] output {0} is currently not supported. '.format(type(output)))
 
-    def run_step(self, module, auto_backward=True, **input):
-        input = self.set_input_to_device(**input)
-        output = module(**input)
+    def run_step(self, module, auto_backward, *input):
+        input = self.set_value_to_device(input)
+
+        output = module(*input)
         if isinstance(output, tuple):
             if not output[0].requires_grad:
                 logging.warning('[run_step] Warning, output[0].requires_grad is False, set to True.')
@@ -118,7 +118,7 @@ class BaseUtil:
             raise NotImplementedError('[run_step] {0} is currently not supported. '.format(type(output)))
         return output
 
-    def run_and_compare_acc(self, module, module_name=None, **input):
+    def run_and_compare_acc(self, module, module_name, *input):
         from utils.acc_utils import accuracy_comparison
         cpu_module = module
         npu_module = copy.deepcopy(module).to('npu')
@@ -130,11 +130,11 @@ class BaseUtil:
 
         self.set_device('cpu')
         logging.info('module {0} start executing on the cpu. '.format(module_name))
-        self.run_step(cpu_module, **input)
+        self.run_step(cpu_module, True, *input)
 
         self.set_device('npu')
         logging.info('module {0} start executing on the npu. '.format(module_name))
-        self.run_step(npu_module, **input)
+        self.run_step(npu_module, True, *input)
 
         logging.info('start compare forward, module_name={0}'.format(module_name))
         accuracy_comparison(self.npu_output_list, self.cpu_output_list)
@@ -142,19 +142,19 @@ class BaseUtil:
         logging.info('start compare backward, module_name={0}'.format(module_name))
         accuracy_comparison(self.npu_grad_list, self.cpu_grad_list)
 
-    def run_and_compare_prof(self, module, prof_path, time_threshold=0.1, **input):
+    def run_and_compare_prof(self, module, prof_path, time_threshold, *input):
         from utils.prof_utils import save_time, compare_with_best_time
         npu_module = copy.deepcopy(module).to('npu')
 
         time_start = time.time()
         self.set_device('npu')
-        self.run_step(npu_module, **input)
+        self.run_step(npu_module, True, *input)
         time_one_step = time.time() - time_start
 
         save_time(time_one_step, prof_path)
         compare_with_best_time(time_one_step, prof_path, time_threshold=time_threshold)
 
-    def run_and_compare_parameters(self, module, module_name=None, **input):
+    def run_and_compare_parameters(self, module, module_name=None, *input):
         from utils.acc_utils import accuracy_comparison
 
         cpu_module = module
@@ -167,11 +167,11 @@ class BaseUtil:
 
         self.set_device('cpu')
         logging.info('compare_parameters, module {0} start executing on the cpu. '.format(module_name))
-        self.run_step(cpu_module, **input)
+        self.run_step(cpu_module, True, *input)
 
         self.set_device('npu')
         logging.info('compare_parameters, module {0} start executing on the npu. '.format(module_name))
-        self.run_step(npu_module, **input)
+        self.run_step(npu_module, True, *input)
 
         for (npu_para_name, npu_para), (cpu_para_name, cpu_para) in \
                 zip(npu_module.named_parameters(), cpu_module.named_parameters()):
@@ -180,28 +180,33 @@ class BaseUtil:
             accuracy_comparison(npu_para, cpu_para)
             accuracy_comparison(npu_para.grad, cpu_para.grad)
 
-    def run_and_compare_real_data(self, module, module_name, forward_input, backward_output):
+    def set_params_from_config(self, module, input):
+        for k in module.__dict__:
+            if k in input['config']['init_kwargs']:
+                module.__dict__[k] = input['config']['init_kwargs'][k]
+        module.__dict__["_is_full_backward_hook"] = True
+        return module
+
+    def run_and_compare_real_data(self, module, module_name, config):
+        forward_input = config['forward']['inputs']
+        backward_output = config['backward']['outputs']
+        target_forward_output = config['forward']['outputs']
+        target_backward_input = config['backward']['inputs']
+
+        assert forward_input
+        assert target_forward_output
         from utils.acc_utils import accuracy_comparison
 
-        cpu_module = module
-        npu_module = copy.deepcopy(module).to('npu')
-        cpu_module.register_forward_hook(self.base_hook_forward_fn)
-        cpu_module.register_backward_hook(self.base_hook_backward_fn)
-        npu_module.register_forward_hook(self.base_hook_forward_fn)
-        npu_module.register_backward_hook(self.base_hook_backward_fn)
-
-        self.set_device('cpu')
-        logging.info('[real_data] module {0} start executing on the cpu. '.format(module_name))
-        output_cpu = self.run_step(cpu_module, False, **forward_input)
-        self.do_real_data_backward(output_cpu, backward_output)
-
         self.set_device('npu')
+        npu_module = copy.deepcopy(module).to('npu')
         logging.info('[real_data] module {0} start executing on the npu. '.format(module_name))
-        output_npu = self.run_step(npu_module, False, **forward_input)
-        self.do_real_data_backward(output_npu, backward_output)
-
+        output_npu = self.run_step(npu_module, False, *forward_input)
         logging.info('start compare forward, module_name={0}'.format(module_name))
-        accuracy_comparison(self.npu_output_list, self.cpu_output_list)
+        accuracy_comparison(output_npu, target_forward_output)
 
-        logging.info('start compare backward, module_name={0}'.format(module_name))
-        accuracy_comparison(self.npu_grad_list, self.cpu_grad_list)
+        if backward_output:
+            logging.info('start compare backward, module_name={0}'.format(module_name))
+            self.do_real_data_backward(output_npu, backward_output)
+            # todo compare
+        else:
+            logging.info('backward_output is empty')

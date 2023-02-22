@@ -51,10 +51,10 @@ class TestShared2FCBBoxHeadTestCase:
     @pytest.mark.acc
     def test_shared2FCB_box_acc(self):
         input = torch.rand(1, 256, 7, 7)
-        self.base_util.run_and_compare_acc(self.box_head, 'Shared2FCB', x=input)
+        self.base_util.run_and_compare_acc(self.box_head, 'Shared2FCB', input)
 
     @pytest.mark.prof
     def test_shared2FCB_box_prof(self):
         input = torch.rand(1, 256, 7, 7)
         prof_path = './data/prof_time_summary/heads/shared2FCB_box/shared2FCB_box_prof.csv'
-        self.base_util.run_and_compare_prof(self.box_head, prof_path, time_threshold=0.1, x=input)
+        self.base_util.run_and_compare_prof(self.box_head, prof_path, 0.1, input)

@@ -94,17 +94,19 @@ comparison_hook.reset_default_hook()
 
 
 def accuracy_comparison(outputs, outputs_expected):
-    if isinstance(outputs, torch.Tensor) and isinstance(outputs_expected, torch.Tensor):
+    assert type(outputs) == type(outputs_expected)
+
+    if isinstance(outputs, torch.Tensor):
         outputs, outputs_expected = [outputs], [outputs_expected]
-    if isinstance(outputs, list) and isinstance(outputs_expected, list):
+    if isinstance(outputs, list) or isinstance(outputs, tuple):
         assert len(outputs) == len(outputs_expected)
         for each_val in zip(outputs, outputs_expected):
             each_output, each_output_expected = each_val[0], each_val[1]
-            if isinstance(each_output, tuple) and isinstance(each_output_expected, tuple):
+            if isinstance(each_output, tuple) or isinstance(each_output, list):
                 # used to compare gradients.
                 for each_tuple_val in zip(each_output, each_output_expected):
                     comparison_hook.compare(each_tuple_val[0].cpu(), each_tuple_val[1].cpu())
             else:
                 comparison_hook.compare(each_output.cpu(), each_output_expected.cpu())
     else:
-        raise NotImplementedError('Only supports Tensor and list of Tensor.')
+        raise NotImplementedError('Only supports Tensor、 tuple and list of Tensor.')

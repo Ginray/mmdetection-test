@@ -47,7 +47,7 @@ class TestSingleRoIExtractorTestCase:
         )
         rois = torch.tensor([[0.0000, 587.8285, 52.1405, 886.2484, 341.5644]])
 
-        self.base_util.run_and_compare_acc(self.roi_extractor, 'RoIExtractor', feats=feats, rois=rois)
+        self.base_util.run_and_compare_acc(self.roi_extractor, 'RoIExtractor', feats, rois)
 
     @pytest.mark.prof
     @pytest.mark.skip(reason='roi_align currently not supported on npu, fix it before 2023/03/31.')
@@ -60,4 +60,4 @@ class TestSingleRoIExtractorTestCase:
         )
         rois = torch.tensor([[0.0000, 587.8285, 52.1405, 886.2484, 341.5644]])
         prof_path = './data/prof_time_summary/heads/roi_extractor/single_roi_extractor_prof.csv'
-        self.base_util.run_and_compare_prof(self.roi_extractor, prof_path, time_threshold=0.1, feats=feats, rois=rois)
+        self.base_util.run_and_compare_prof(self.roi_extractor, prof_path, 0.1, feats, rois)

@@ -52,7 +52,7 @@ class TestMaxIoUAssignerTestCase:
         gt_bboxes = torch.Tensor([[0, 0, 10, 9], [10, 10, 19, 19],
                                   [10, 10, 15, 15], [3, 3, 4, 4]])
 
-        self.base_util.run_and_compare_acc(self.maxIoU_assigner, 'maxIoU_assigner', bboxes=bboxes, gt_bboxes=gt_bboxes)
+        self.base_util.run_and_compare_acc(self.maxIoU_assigner, 'maxIoU_assigner', bboxes, gt_bboxes)
 
     @pytest.mark.prof
     def test_maxIoU_assigner_prof(self):
@@ -62,5 +62,4 @@ class TestMaxIoUAssignerTestCase:
                                   [10, 10, 15, 15], [3, 3, 4, 4]])
         prof_path = './data/prof_time_summary/others/maxIoU_assigner/maxIoU_assigner_prof.csv'
 
-        self.base_util.run_and_compare_prof(self.maxIoU_assigner, prof_path, time_threshold=0.1, bboxes=bboxes,
-                                            gt_bboxes=gt_bboxes)
+        self.base_util.run_and_compare_prof(self.maxIoU_assigner, prof_path, 0.1, bboxes, gt_bboxes)
