@@ -79,8 +79,9 @@ class BaseUtil:
         backward_output = self.set_value_to_device(backward_output)
 
         if isinstance(output, tuple) or isinstance(output, list):
-            for each_output in output:
-                each_output.backward(backward_output)
+            assert len(output) == len(backward_output)
+            for (each_output, each_backward_output) in zip(output, backward_output):
+                each_output.backward(each_backward_output, retain_graph=True)
         elif isinstance(output, torch.Tensor):
             output.backward(backward_output)
         else:
@@ -174,8 +175,8 @@ class BaseUtil:
 
     def set_params_from_config(self, module, input):
         for k in module.__dict__:
-            if k in input['config']['init_kwargs']:
-                module.__dict__[k] = input['config']['init_kwargs'][k]
+            if k in input['config']['model_dict']:
+                module.__dict__[k] = input['config']['model_dict'][k]
         module.__dict__["_is_full_backward_hook"] = True
         return module
 
@@ -193,7 +194,6 @@ class BaseUtil:
         npu_module = copy.deepcopy(module).to('npu')
         logging.info('[real_data] module {0} start executing on the npu. '.format(module_name))
         output_npu = self.run_step(npu_module, False, *forward_input)
-        # todo 使用loss函数做反向
         logging.info('start compare forward, module_name={0}'.format(module_name))
         accuracy_comparison(output_npu, target_forward_output)
 
@@ -201,11 +201,16 @@ class BaseUtil:
             logging.info('start compare backward, module_name={0}'.format(module_name))
             npu_module.register_full_backward_hook(self.base_hook_backward_fn)
             self.do_real_data_backward(output_npu, backward_output)
-            accuracy_comparison(self.npu_grad_list[0], target_backward_input)
+            if not self.npu_grad_list and target_backward_input[0] is None:
+                pass
+            else:
+                accuracy_comparison(self.npu_grad_list, target_backward_input)
         else:
+            # todo 使用loss函数做反向
             logging.info('compare with real_data, backward_output is empty.')
 
         # compare parameters
         for n, p in npu_module.named_parameters():
-            if p.grad is not None and config['named_parameters'][n] is not None:
-                accuracy_comparison(p.grad, config['named_parameters'][n])
+            logging.info("start compare named parameters, module name = ", n)
+            if p.grad is not None and config['grads'][n] is not None:
+                accuracy_comparison(p.grad, config['grads'][n])
