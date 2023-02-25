@@ -204,7 +204,7 @@ class BaseUtil:
             if not self.npu_grad_list and target_backward_input[0] is None:
                 pass
             else:
-                accuracy_comparison(self.npu_grad_list, target_backward_input, module_name)
+                accuracy_comparison(self.npu_grad_list[0], target_backward_input, module_name)
         else:
             # todo 使用loss函数做反向
             logging.info('compare with real_data, backward_output is empty.')
