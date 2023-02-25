@@ -193,6 +193,7 @@ class BaseUtil:
         npu_module = copy.deepcopy(module).to('npu')
         logging.info('[real_data] module {0} start executing on the npu. '.format(module_name))
         output_npu = self.run_step(npu_module, False, *forward_input)
+        # todo 使用loss函数做反向
         logging.info('start compare forward, module_name={0}'.format(module_name))
         accuracy_comparison(output_npu, target_forward_output)
 
@@ -200,6 +201,11 @@ class BaseUtil:
             logging.info('start compare backward, module_name={0}'.format(module_name))
             npu_module.register_full_backward_hook(self.base_hook_backward_fn)
             self.do_real_data_backward(output_npu, backward_output)
-            accuracy_comparison(self.npu_grad_list, target_backward_input)
+            accuracy_comparison(self.npu_grad_list[0], target_backward_input)
         else:
             logging.info('compare with real_data, backward_output is empty.')
+
+        # compare parameters
+        for n, p in npu_module.named_parameters():
+            if p.grad is not None and config['named_parameters'][n] is not None:
+                accuracy_comparison(p.grad, config['named_parameters'][n])

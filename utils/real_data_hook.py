@@ -11,61 +11,38 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import copy
+import glob
+import os.path
+
 import torch
 
 
-def hook_func_forward(name, module, dump_dict):
+def module_hook_func(name, module, dump_dict, mode="forward"):
     def hook_function(module, inputs, outputs):
-        print(f'{name} ######inputs', [i if i is not None else i for i in inputs])
-        print(f'{name} ######outputs', [i if i is not None else i for i in outputs])
-
-        import copy
-        print(module.__dict__.keys())
-        dump_dict['config']['init_kwargs'] = copy.deepcopy(module.__dict__)
-
-        pop_list = []
-        for k in dump_dict['config']['init_kwargs']:
-            if k in ['_backward_hooks', '_forward_hooks']:
-                pop_list.append(k)
-
-        for k in pop_list:
-            dump_dict['config']['init_kwargs'].pop(k)
-
-        dump_dict['forward']['inputs'] = inputs
-        dump_dict['forward']['outputs'] = outputs
-
-    return hook_function
-
-
-def hook_func_backward(name, module, dump_dict):
-    def hook_function(module, inputs, outputs):
-        print(f'{name} ######backward inputs', [i if i is not None else i for i in inputs])
-        print(f'{name} ######backward outputs', [i if i is not None else i for i in outputs])
-
-        dump_dict['backward']['inputs'] = inputs
-        dump_dict['backward']['outputs'] = outputs
+        dump_dict[mode]['inputs'] = inputs
+        dump_dict[mode]['outputs'] = outputs
 
     return hook_function
 
 
 def param_hook_func(name, dump_dict):
     def hook_function(grad):
-        print(f'{name} ######param_hook_func')
-        dump_dict['named_parameters'][name] = grad
-        torch.save(dump_dict, 'dump.pth')
-        if name == 'lateral_convs.0.conv.bias':
-            import time
-            time.sleep(2)
-            exit(0)
+        dump_dict['grads'][name] = grad
 
     return hook_function
 
 
 def init_dump_dict():
     tmp_dict = {
+        "name": "",
+        "type": None,
         "config": {
-            "init_kwargs": {},
-            "others": {},
+            "model_dict": {},
+            "args_kwargs": {},
+            "state_dict": {},
+            "thresholds": {},
+            "loss_fn": {},
         },
         "forward": {
             "inputs": {},
@@ -75,20 +52,109 @@ def init_dump_dict():
             "inputs": {},
             "outputs": {},
         },
-        "named_parameters": {},
+        "grads": {},
     }
     return tmp_dict
 
 
-dump_list = init_dump_dict()
+def check_dump_dict(dump_dict, full_log=False):
+    err_str = ''
 
-for name, module in model.named_modules():
-    print('=========>named_modules, name = ', name)
-    if name == "neck":
-        module.register_forward_hook(hook_func_forward('[forward]:' + name, module, dump_list))
-        module.register_full_backward_hook(hook_func_backward('[backward]:' + name, module, dump_list))
+    if not dump_dict['config']['model_dict']:
+        err_str += 'config::model_dict is empty, please check.\n'
 
-for name, p in model.named_parameters():
-    print('=========>named_parameters, name = ', name)
-    if "neck" in name:
-        p.register_hook(param_hook_func(name.replace('neck.', ""), dump_list))
+    if not dump_dict['forward']['inputs']:
+        err_str += 'forward::inputs is empty, please check.\n'
+
+    if isinstance(dump_dict['forward']['outputs'], dict) and (not dump_dict['forward']['outputs']):
+        err_str += 'forward::outputs is empty, please check.\n'
+
+    if not dump_dict['backward']['inputs']:
+        err_str += 'backward::inputs is empty, please check.\n'
+
+    if not dump_dict['backward']['outputs']:
+        err_str += 'backward::outputs is empty, please check.\n'
+
+    try:
+        param_num = sum([len(list(m.parameters())) for m in (dump_dict['config']['model_dict']['_modules'].values())])
+    except:
+        param_num = 0
+
+    if not dump_dict['backward']['outputs']:
+        if param_num > 0:
+            err_str += 'grads is empty, please check.\n'
+
+    if err_str:
+        if full_log:
+            err_str = f"### {dump_dict['name']} check failed. \n" + err_str
+        else:
+            err_str = f"### {dump_dict['name']} check failed. \n"
+
+    return err_str
+
+
+def check_dump_dict_dir(dir_path, full_log=False):
+    err_str = ""
+    for file_path in glob.glob(os.path.join(dir_path, '*.pth')):
+        dump_list = torch.load(file_path, map_location='cpu')
+        err_str_tmp = check_dump_dict(dump_list, full_log)
+
+        if err_str_tmp:
+            err_str += err_str_tmp
+    return err_str
+
+
+def is_torch_module(module):
+    return str(type(module)).replace("'", "").split(' ')[1].startswith('torch.')
+
+
+def dump_hook(model, dump_name_list=[], auto=False):
+    model.dump_dict = dump_dict = {}
+    for m_name, module in model.named_modules():
+        if m_name in dump_name_list or (auto and (not is_torch_module(module))):
+            dump_dict[m_name] = init_dump_dict()
+            dump_dict[m_name]['name'] = m_name
+            dump_dict[m_name]['type'] = str(type(module))
+            dump_dict[m_name]['config']['model_dict'] = copy.deepcopy(module.__dict__)
+            module.register_forward_hook(
+                module_hook_func('[forward]:' + m_name, module, dump_dict[m_name], mode='forward'))
+            module.register_full_backward_hook(
+                module_hook_func('[forward]:' + m_name, module, dump_dict[m_name], mode='backward'))
+
+            for p_name, p in module.named_parameters():
+                if p.requires_grad:
+                    p.register_hook(param_hook_func(p_name.replace(f"{m_name}", ""), dump_dict[m_name]))
+
+    return model
+
+
+def dump_save(dump_dict, save_dir="./dump"):
+    os.makedirs(save_dir, exist_ok=True)
+
+    for k in dump_dict:
+        err_str = check_dump_dict(dump_dict[k], True)
+        if err_str:
+            print(err_str)
+        torch.save(dump_dict[k], os.path.join(save_dir, f"{k}.pth"))
+    exit()
+
+
+def diff_error(inputs, targets):
+    diff_abs = (inputs - targets).abs()
+    return diff_abs.max(), diff_abs.sum() / torch.count_nonzero(diff_abs)
+
+
+def state_dict_remove_prefix(state_dict, prefix):
+    new_state_dict = OrderedDict()
+    for name, v in state_dict.items():
+        if name.startwith(prefix):
+            name = name.replace(prefix, '')
+        new_state_dict[name] = v
+    return new_state_dict
+
+
+print('==================================>model')
+print(model.modules)
+
+dump_name_list = ["backbone.layer1", "backbone.layer2", "backbone.layer3", "backbone.layer4", "rpn_head.loss_cls"]
+model = dump_hook(model, dump_name_list, auto=False)
