@@ -195,7 +195,7 @@ class BaseUtil:
         logging.info('[real_data] module {0} start executing on the npu. '.format(module_name))
         output_npu = self.run_step(npu_module, False, *forward_input)
         logging.info('start compare forward, module_name={0}'.format(module_name))
-        accuracy_comparison(output_npu, target_forward_output)
+        accuracy_comparison(output_npu, target_forward_output, module_name)
 
         if backward_output:
             logging.info('start compare backward, module_name={0}'.format(module_name))
@@ -204,13 +204,13 @@ class BaseUtil:
             if not self.npu_grad_list and target_backward_input[0] is None:
                 pass
             else:
-                accuracy_comparison(self.npu_grad_list, target_backward_input)
+                accuracy_comparison(self.npu_grad_list, target_backward_input, module_name)
         else:
             # todo 使用loss函数做反向
             logging.info('compare with real_data, backward_output is empty.')
 
         # compare parameters
-        for n, p in npu_module.named_parameters():
-            logging.info("start compare named parameters, module name = {0}".format(n))
-            if p.grad is not None and config['grads'][n] is not None:
-                accuracy_comparison(p.grad, config['grads'][n])
+        for name, p in npu_module.named_parameters():
+            logging.info("start compare named parameters, module name = {0}".format(name))
+            if p.grad is not None and config['grads'][name] is not None:
+                accuracy_comparison(p.grad, config['grads'][name], name)

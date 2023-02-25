@@ -32,8 +32,8 @@ class TestResnetTestCase:
 
     @pytest.mark.acc
     def test_resnet_basic_block_parameters(self):
-        comparison_hook.update_threshold('value', 0.02)
-        comparison_hook.update_threshold('cos', 0.998)
+        comparison_hook.update_threshold_all_module('value', 0.02)
+        comparison_hook.update_threshold_all_module('cos', 0.998)
 
         self.block = BasicBlock(3, 3)
         input = torch.load('./data/pt_dump/backbones/resnet/Resnet_input.pt', map_location=torch.device('cpu'))
@@ -42,7 +42,7 @@ class TestResnetTestCase:
     @pytest.mark.acc
     def test_resnet_basic_block_acc(self):
         self.block = BasicBlock(64, 64)
-        comparison_hook.update_threshold('cos', 0.97)
+        comparison_hook.update_threshold_all_module('cos', 0.97)
 
         input = torch.rand(1, 64, 56, 56)
         self.base_util.run_and_compare_with_cpu_acc(self.block, 'Resnet', input)
@@ -50,7 +50,7 @@ class TestResnetTestCase:
     @pytest.mark.acc
     def test_resnet_basic_block_acc_2(self):
         self.block = BasicBlock(3, 3)
-        comparison_hook.update_threshold('value', 0.015)
+        comparison_hook.update_threshold_all_module('value', 0.015)
         comparison_hook.delete_comparison_hook('cos')
 
         # todo 所有路径统一到配置文件中

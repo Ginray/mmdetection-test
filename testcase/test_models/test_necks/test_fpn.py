@@ -50,12 +50,11 @@ class TestFPNTestCase:
 
     @pytest.mark.acc
     def test_fpn_basic_block_acc_real_data(self):
-        # todo 为每一层单独设置阈值
-        comparison_hook.update_threshold('cos', 0.998)
-
         fpn_model = FPN(in_channels=[1, 2, 3], out_channels=8, num_outs=5)
-        pt_path = './data/pt_dump/necks/fpn/'
-        config = torch.load(pt_path + 'fpn.pth', map_location=torch.device('cpu'))
+        comparison_hook.update_threshold_for_module('cos', {"fpn_convs.2.conv.weight": 0.998})
+
+        pt_path = './data/pt_dump/necks/fpn/fpn.pth'
+        config = torch.load(pt_path, map_location=torch.device('cpu'))
         fpn_model = self.base_util.set_params_from_config(fpn_model, config)
         self.base_util.run_and_compare_with_real_data_acc(fpn_model, 'FPN', config)
 
