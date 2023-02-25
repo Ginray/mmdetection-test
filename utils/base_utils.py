@@ -211,6 +211,6 @@ class BaseUtil:
 
         # compare parameters
         for n, p in npu_module.named_parameters():
-            logging.info("start compare named parameters, module name = ", n)
+            logging.info("start compare named parameters, module name = {0}".format(n))
             if p.grad is not None and config['grads'][n] is not None:
                 accuracy_comparison(p.grad, config['grads'][n])
