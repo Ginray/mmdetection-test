@@ -16,7 +16,7 @@ import torch
 import logging
 
 
-def cos_comparison(outputs, outputs_expected, cos_threshold):
+def cos_comparison(outputs, outputs_expected, cos_threshold, module_name):
     assert isinstance(outputs, torch.Tensor)
     assert isinstance(outputs_expected, torch.Tensor)
     outputs, outputs_expected = outputs.float(), outputs_expected.float()
@@ -36,16 +36,19 @@ def cos_comparison(outputs, outputs_expected, cos_threshold):
     if cosine_similarity == 0:
         # outputs中存在一行完全为0，用1替换之后再进行相似度计算
         cosine_similarity = torch.where(cosine_tensor == 0, torch.ones_like(cosine_tensor), cosine_tensor).min()
-    logging.info('==> cosine_similarity={0}, cos_threshold={1}'.format(cosine_similarity, cos_threshold))
+    logging.info('===>module_name={0}, cosine_similarity={1}, cos_threshold={2}'.
+                 format(module_name, cosine_similarity, cos_threshold))
     assert cosine_similarity >= cos_threshold, \
         "cosine_similarity={0}, cos_threshold={1}".format(cosine_similarity, cos_threshold)
 
 
-def value_comparison(outputs, outputs_expected, value_threshold):
+def value_comparison(outputs, outputs_expected, value_threshold, module_name):
     assert isinstance(outputs, torch.Tensor)
     assert isinstance(outputs_expected, torch.Tensor)
     value_similarity = (outputs - outputs_expected).abs().max()
-    logging.info('====> value_similarity={0}, value_threshold={1}'.format(value_similarity, value_threshold))
+    logging.info(
+        '=====>module_name={0}, value_similarity={1}, value_threshold={2}'.
+        format(module_name, value_similarity, value_threshold))
     assert value_similarity <= value_threshold, \
         "value_similarity={0}, value_threshold={1}".format(value_similarity, value_threshold)
 
@@ -106,7 +109,7 @@ class ComparisonHook(object):
             threshold = self.threshold[name]
             if module_name is not None and name + '_' + module_name in self.threshold_module.keys():
                 threshold = self.threshold_module[name + '_' + module_name]
-            each_compare(outputs, outputs_expected, threshold)
+            each_compare(outputs, outputs_expected, threshold, module_name)
         logging.info(" ")
 
 

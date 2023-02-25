@@ -15,6 +15,7 @@
 import pytest
 import torch
 from mmdet.models.backbones.resnet import BasicBlock
+from mmdet.models.backbones import ResNet
 from utils.acc_utils import comparison_hook
 from utils.base_utils import BaseUtil
 
@@ -56,6 +57,19 @@ class TestResnetTestCase:
         # todo 所有路径统一到配置文件中
         input = torch.load('./data/pt_dump/backbones/resnet/Resnet_input.pt', map_location=torch.device('cpu'))
         self.base_util.run_and_compare_with_cpu_acc(self.block, 'Resnet', input)
+
+    @pytest.mark.acc
+    def test_resnet_basic_block_acc_real_data(self):
+        model = ResNet(depth=18)
+
+        pt_path = './data/pt_dump/backbones/resnet/resnet.pth'
+        config = torch.load(pt_path, map_location=torch.device('cpu'))
+        resnet_model = self.base_util.set_params_from_config(model, config)
+
+        if config['config']['thresholds']:
+            comparison_hook.update_threshold_all_module('value', float(config['config']['thresholds']))
+        comparison_hook.update_threshold_for_module('value', {"Resnet": 0.029})
+        self.base_util.run_and_compare_with_real_data_acc(resnet_model, 'Resnet', config)
 
     @pytest.mark.prof
     def test_resnet_basic_block_prof(self):

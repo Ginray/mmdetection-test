@@ -208,9 +208,13 @@ class BaseUtil:
         else:
             # todo 使用loss函数做反向
             logging.info('compare with real_data, backward_output is empty.')
+            raise NotImplementedError
+            npu_module.register_full_backward_hook(self.base_hook_backward_fn)
+            loss_func = config['config']['loss_fn']
+            final_output = loss_func(output_npu)
+            final_output.backward()
 
         # compare parameters
         for name, p in npu_module.named_parameters():
-            logging.info("start compare named parameters, module name = {0}".format(name))
             if p.grad is not None and config['grads'][name] is not None:
                 accuracy_comparison(p.grad, config['grads'][name], name)
