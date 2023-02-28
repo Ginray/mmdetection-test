@@ -93,11 +93,21 @@ class BaseUtil:
 
         output = module(*input)
         if isinstance(output, tuple):
-            if not output[0].requires_grad:
-                logging.warning('[run_step] Warning, output[0].requires_grad is False, set to True.')
-                output[0].requires_grad_(True)
-            if auto_backward:
-                output[0].mean().backward()
+            if isinstance(output[0], torch.Tensor):
+                if output[0].requires_grad:
+                    logging.warning('[run_step] Warning, output[0].requires_grad is False, set to True.')
+                    output[0].requires_grad_(True)
+                if auto_backward:
+                    output[0].mean().backward()
+            elif isinstance(output[0], list) or isinstance(output[0], tuple):
+                for each_output in output[0]:
+                    if each_output.requires_grad:
+                        logging.warning('[run_step] Warning, each_output.requires_grad is False, set to True.')
+                        each_output.requires_grad_(True)
+                    if auto_backward:
+                        each_output.mean().backward()
+            else:
+                raise NotImplementedError
         elif isinstance(output, torch.Tensor):
             if output.dtype != torch.float:
                 logging.warning('output.dtype is {0}, set to float.'.format(output.dtype))
@@ -206,14 +216,14 @@ class BaseUtil:
             else:
                 accuracy_comparison(self.npu_grad_list[0], target_backward_input, module_name)
         else:
-            # todo 使用loss函数做反向
             logging.info('compare with real_data, backward_output is empty.')
-            raise NotImplementedError
             npu_module.register_full_backward_hook(self.base_hook_backward_fn)
             loss_func = config['config']['loss_fn']
-            final_output = loss_func(output_npu)
-            final_output.backward()
-
+            if loss_func:
+                final_output = loss_func(output_npu)
+                final_output.backward()
+            else:
+                logging.warning('module {0} loss_func is empty.'.format(module_name))
         # compare parameters
         for name, p in npu_module.named_parameters():
             if p.grad is not None and config['grads'][name] is not None:

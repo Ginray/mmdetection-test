@@ -45,7 +45,7 @@ def cos_comparison(outputs, outputs_expected, cos_threshold, module_name):
 def value_comparison(outputs, outputs_expected, value_threshold, module_name):
     assert isinstance(outputs, torch.Tensor)
     assert isinstance(outputs_expected, torch.Tensor)
-    value_similarity = (outputs - outputs_expected).abs().max()
+    value_similarity = (outputs - outputs_expected).to(torch.float).abs().max()
     logging.info(
         '=====>module_name={0}, value_similarity={1}, value_threshold={2}'.
         format(module_name, value_similarity, value_threshold))
@@ -129,7 +129,16 @@ def accuracy_comparison(outputs, outputs_expected, module_name=None):
             if isinstance(each_output, tuple) or isinstance(each_output, list):
                 # used to compare gradients.
                 for each_tuple_val in zip(each_output, each_output_expected):
-                    comparison_hook.compare(each_tuple_val[0].cpu(), each_tuple_val[1].cpu(), module_name)
+                    if isinstance(each_tuple_val[0], list) or isinstance(each_tuple_val[0], tuple):
+                        for etv in zip(each_tuple_val[0], each_tuple_val[1]):
+                            comparison_hook.compare(etv[0].cpu(), etv[1].cpu(), module_name)
+                    elif isinstance(each_tuple_val[0], torch.Tensor):
+                        comparison_hook.compare(each_tuple_val[0].cpu(), each_tuple_val[1].cpu(), module_name)
+                    elif each_tuple_val[0] is None:
+                        continue
+                    else:
+                        raise NotImplementedError(
+                            "the type of each_tuple_val[0] is {0}".format(type(each_tuple_val[0])))
             else:
                 comparison_hook.compare(each_output.cpu(), each_output_expected.cpu(), module_name)
     else:

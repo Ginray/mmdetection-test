@@ -39,6 +39,7 @@ python3 main.py --device=910B  --scope=single --case_id=4    # Test the case wit
 |--------------------| ----------- | -------- |
 | Shared2FCBBoxHead  | ✔           | ✔       |
 | SingleRoIExtractor | ❌          | ❌       |
+| SSDHead            | ✔          | ✔       |
 
 ### others:
 
