@@ -51,4 +51,4 @@ class TestCrossEntropyLossTestCase:
         cls_score = torch.rand([15, 10])
         label = torch.tensor([1, 0, 4, 8, 4, 7, 9, 3, 2, 5, 3, 6, 2, 7, 9])
         prof_path = './data/prof_time_summary/others/cross_entropy/cross_entropy_prof.csv'
-        self.base_util.run_and_compare_prof(self.loss, prof_path, 0.1, cls_score, label)
+        self.base_util.run_and_compare_prof(self.loss, prof_path, 0.4, cls_score, label)

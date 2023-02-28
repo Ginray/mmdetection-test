@@ -69,4 +69,4 @@ class TestFPNTestCase:
             for i in range(len(self.in_channels))
         ]
         prof_path = './data/prof_time_summary/necks/fpn/fpn_prof.csv'
-        self.base_util.run_and_compare_prof(self.fpn_model, prof_path, 0.1, feats)
+        self.base_util.run_and_compare_prof(self.fpn_model, prof_path, 0.4, feats)

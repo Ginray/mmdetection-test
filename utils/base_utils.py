@@ -228,3 +228,5 @@ class BaseUtil:
         for name, p in npu_module.named_parameters():
             if p.grad is not None and config['grads'][name] is not None:
                 accuracy_comparison(p.grad, config['grads'][name], name)
+            else:
+                logging.warning('tensor name {0} grads is None.'.format(name))
