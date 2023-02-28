@@ -52,5 +52,5 @@ class TestRetinaHeadTestCase:
     @pytest.mark.prof
     def test_retina_head_prof(self):
         x = torch.rand(2, 2, 7, 3, 3)
-        prof_path = './data/prof_time_summary/heads/retina_head/single_roi_extractor_prof.csv'
+        prof_path = './data/prof_time_summary/heads/retina_head/retina_head_prof.csv'
         self.base_util.run_and_compare_prof(self.retina_head, prof_path, 0.4, x)
