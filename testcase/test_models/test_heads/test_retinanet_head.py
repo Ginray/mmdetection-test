@@ -39,7 +39,6 @@ class TestRetinaHeadTestCase:
 
     @pytest.mark.acc
     def test_retina_head_acc_real_data(self):
-        comparison_hook.update_threshold_all_module('value', 1e-4)
         retina_head = RetinaHead(11, 7)
         pt_path = './data/pt_dump/heads/retina_head/retina_head.pth'
         config = torch.load(pt_path, map_location=torch.device('cpu'))
