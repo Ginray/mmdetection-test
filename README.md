@@ -42,6 +42,7 @@ python3 main.py --device=910B  --scope=single --case_id=4    # Test the case wit
 | SSDHead            | ✔          | ✔       |
 | RetinaHead         | ✔          | ✔       |
 | YOLOV3Head         | ✔          | ✔       |
+| YOLOXHead          | ✔          | ✔       |
 
 ### others:
 

@@ -140,10 +140,10 @@ class BaseUtil:
         self.run_step(npu_module, True, *input)
 
         logging.info('start compare forward, module_name={0}'.format(module_name))
-        accuracy_comparison(self.npu_output_list, self.cpu_output_list)
+        accuracy_comparison(self.npu_output_list, self.cpu_output_list, module_name)
 
         logging.info('start compare backward, module_name={0}'.format(module_name))
-        accuracy_comparison(self.npu_grad_list, self.cpu_grad_list)
+        accuracy_comparison(self.npu_grad_list, self.cpu_grad_list, module_name)
 
     def run_and_compare_prof(self, module, prof_path, time_threshold, *input):
         from utils.prof_utils import save_time, compare_with_mean_time
