@@ -60,4 +60,4 @@ class TestSingleRoIExtractorTestCase:
         )
         rois = torch.tensor([[0.0000, 587.8285, 52.1405, 886.2484, 341.5644]])
         prof_path = './data/prof_time_summary/heads/roi_extractor/single_roi_extractor_prof.csv'
-        self.base_util.run_and_compare_prof(self.roi_extractor, prof_path, 0.4, feats, rois)
+        self.base_util.run_and_compare_prof(self.roi_extractor, prof_path, 0.3, feats, rois)

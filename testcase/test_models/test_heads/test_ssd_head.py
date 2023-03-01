@@ -84,4 +84,4 @@ class TestSSDHeadTestCase:
             torch.rand((1, 256, 2, 4)),
         )
         prof_path = './data/prof_time_summary/heads/ssd_head/ssd_head_prof.csv'
-        self.base_util.run_and_compare_prof(self.ssd_head, prof_path, 0.4, feats)
+        self.base_util.run_and_compare_prof(self.ssd_head, prof_path, 0.3, feats)

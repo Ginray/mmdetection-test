@@ -38,13 +38,13 @@ def save_time(time_to_save, path):
         data.to_csv(path, index=False)
 
 
-def compare_with_best_time(time, path, time_threshold=0.1):
+def compare_with_mean_time(time, path, time_threshold=0.1):
     assert os.path.exists(path)
     data_ori = pd.read_csv(path)
-    best_time = data_ori['one_step_time(s)'].loc[data_ori['device_info'] == device_info].min()
+    mean_time = data_ori['one_step_time(s)'].loc[data_ori['device_info'] == device_info].mean()
 
-    gap = (time - best_time) / best_time
-    logging.info('====> best_time={0}, gap={1}, time_threshold={2}'.format(best_time, gap, time_threshold))
+    gap = (time - mean_time) / mean_time
+    logging.info('====> mean_time={0}, gap={1}, time_threshold={2}'.format(mean_time, gap, time_threshold))
 
     assert gap <= time_threshold, \
-        "compare_with_best_time, best_time={0}, gap={1}, time_threshold={2}".format(best_time, gap, time_threshold)
+        "compare_with_mean_time, mean_time={0}, gap={1}, time_threshold={2}".format(mean_time, gap, time_threshold)

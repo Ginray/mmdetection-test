@@ -62,4 +62,4 @@ class TestMaxIoUAssignerTestCase:
                                   [10, 10, 15, 15], [3, 3, 4, 4]])
         prof_path = './data/prof_time_summary/others/maxIoU_assigner/maxIoU_assigner_prof.csv'
 
-        self.base_util.run_and_compare_prof(self.maxIoU_assigner, prof_path, 0.4, bboxes, gt_bboxes)
+        self.base_util.run_and_compare_prof(self.maxIoU_assigner, prof_path, 0.3, bboxes, gt_bboxes)

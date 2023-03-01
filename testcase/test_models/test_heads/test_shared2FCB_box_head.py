@@ -57,4 +57,4 @@ class TestShared2FCBBoxHeadTestCase:
     def test_shared2FCB_box_prof(self):
         input = torch.rand(1, 256, 7, 7)
         prof_path = './data/prof_time_summary/heads/shared2FCB_box/shared2FCB_box_prof.csv'
-        self.base_util.run_and_compare_prof(self.box_head, prof_path, 0.4, input)
+        self.base_util.run_and_compare_prof(self.box_head, prof_path, 0.3, input)

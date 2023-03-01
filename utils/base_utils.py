@@ -146,7 +146,7 @@ class BaseUtil:
         accuracy_comparison(self.npu_grad_list, self.cpu_grad_list)
 
     def run_and_compare_prof(self, module, prof_path, time_threshold, *input):
-        from utils.prof_utils import save_time, compare_with_best_time
+        from utils.prof_utils import save_time, compare_with_mean_time
         npu_module = copy.deepcopy(module).to('npu')
 
         time_start = time.time()
@@ -155,7 +155,7 @@ class BaseUtil:
         time_one_step = time.time() - time_start
 
         save_time(time_one_step, prof_path)
-        compare_with_best_time(time_one_step, prof_path, time_threshold=time_threshold)
+        compare_with_mean_time(time_one_step, prof_path, time_threshold=time_threshold)
 
     def run_and_compare_with_cpu_parameters(self, module, module_name=None, *input):
         from utils.acc_utils import accuracy_comparison
