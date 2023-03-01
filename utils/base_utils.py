@@ -103,7 +103,7 @@ class BaseUtil:
             if output.dtype != torch.float:
                 logging.warning('output.dtype is {0}, set to float.'.format(output.dtype))
                 output = output.float()
-            if not output.requires_grad and auto_backward:
+            if not output.requires_grad:
                 output.mean().backward()
         else:
             raise NotImplementedError('[do_auto_backward] {0} is currently not supported. '.format(type(output)))
@@ -113,7 +113,8 @@ class BaseUtil:
         input = self.set_value_to_device(input)
 
         output = module(*input)
-        self.do_auto_backward(output)
+        if auto_backward:
+            self.do_auto_backward(output)
         return output
 
     def run_and_compare_with_cpu_acc(self, module, module_name, *input):
