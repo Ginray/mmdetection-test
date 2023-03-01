@@ -41,6 +41,7 @@ python3 main.py --device=910B  --scope=single --case_id=4    # Test the case wit
 | SingleRoIExtractor | ❌          | ❌       |
 | SSDHead            | ✔          | ✔       |
 | RetinaHead         | ✔          | ✔       |
+| YOLOV3Head         | ✔          | ✔       |
 
 ### others:
 
