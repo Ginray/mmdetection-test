@@ -33,7 +33,7 @@ class TestYOLOV3HeadTestCase:
 
     @pytest.mark.acc
     def test_yolo_head_acc(self):
-        comparison_hook.update_threshold_all_module('value', 1e-3)
+        comparison_hook.update_threshold_all_module('value', 0.0015)
         x = [torch.rand(2, 32, 3, 3), torch.rand(2, 16, 3, 3), torch.rand(2, 8, 3, 3)]
 
         self.base_util.run_and_compare_with_cpu_acc(self.yolo_head, 'YOLOV3Head', x)

@@ -104,7 +104,7 @@ class BaseUtil:
                 logging.warning('output.dtype is {0}, set to float.'.format(output.dtype))
                 output = output.float()
             if output.requires_grad:
-                output.mean().backward()
+                output.mean().backward(retain_graph=True)
         else:
             raise NotImplementedError('[do_auto_backward] {0} is currently not supported. '.format(type(output)))
         return output
@@ -176,8 +176,8 @@ class BaseUtil:
                 zip(npu_module.named_parameters(), cpu_module.named_parameters()):
             logging.debug('compare_parameters, para_name={} '.format(npu_para_name))
             assert npu_para_name == cpu_para_name
-            accuracy_comparison(npu_para, cpu_para)
-            accuracy_comparison(npu_para.grad, cpu_para.grad)
+            accuracy_comparison(npu_para, cpu_para, module_name)
+            accuracy_comparison(npu_para.grad, cpu_para.grad, module_name)
 
     def set_params_from_config(self, module, input):
         for k in module.__dict__:
