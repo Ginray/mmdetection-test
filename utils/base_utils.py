@@ -103,7 +103,7 @@ class BaseUtil:
             if output.dtype != torch.float:
                 logging.warning('output.dtype is {0}, set to float.'.format(output.dtype))
                 output = output.float()
-            if not output.requires_grad:
+            if output.requires_grad:
                 output.mean().backward()
         else:
             raise NotImplementedError('[do_auto_backward] {0} is currently not supported. '.format(type(output)))

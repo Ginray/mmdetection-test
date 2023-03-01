@@ -122,27 +122,14 @@ comparison_hook.reset_default_hook()
 
 def accuracy_comparison(outputs, outputs_expected, module_name=None):
     assert type(outputs) == type(outputs_expected)
-
+    if outputs is None and outputs_expected is None:
+        return
     if isinstance(outputs, torch.Tensor):
-        outputs, outputs_expected = [outputs], [outputs_expected]
-    if isinstance(outputs, list) or isinstance(outputs, tuple):
+        comparison_hook.compare(outputs.cpu(), outputs_expected.cpu(), module_name)
+    elif isinstance(outputs, list) or isinstance(outputs, tuple):
         assert len(outputs) == len(outputs_expected)
-        for each_val in zip(outputs, outputs_expected):
-            each_output, each_output_expected = each_val[0], each_val[1]
-            if isinstance(each_output, tuple) or isinstance(each_output, list):
-                # used to compare gradients.
-                for each_tuple_val in zip(each_output, each_output_expected):
-                    if isinstance(each_tuple_val[0], list) or isinstance(each_tuple_val[0], tuple):
-                        for etv in zip(each_tuple_val[0], each_tuple_val[1]):
-                            comparison_hook.compare(etv[0].cpu(), etv[1].cpu(), module_name)
-                    elif isinstance(each_tuple_val[0], torch.Tensor):
-                        comparison_hook.compare(each_tuple_val[0].cpu(), each_tuple_val[1].cpu(), module_name)
-                    elif each_tuple_val[0] is None:
-                        continue
-                    else:
-                        raise NotImplementedError(
-                            "the type of each_tuple_val[0] is {0}".format(type(each_tuple_val[0])))
-            else:
-                comparison_hook.compare(each_output.cpu(), each_output_expected.cpu(), module_name)
+        for each_output, each_output_expected in zip(outputs, outputs_expected):
+            accuracy_comparison(each_output, each_output_expected, module_name)
     else:
-        raise NotImplementedError('Only supports Tensor、 tuple and list of Tensor.')
+        raise NotImplementedError(
+            'Only supports Tensor/tuple and list of Tensor, type of outputs is {0}'.format(type(outputs)))
