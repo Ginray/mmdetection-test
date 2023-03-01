@@ -67,6 +67,7 @@ test_cases = [
     "./testcase/test_models/test_necks/test_fpn.py",
     "./testcase/test_models/test_heads/test_single_roi_extractor.py",
     "./testcase/test_models/test_heads/test_shared2FCB_box_head.py",
+    "./testcase/test_models/test_heads/test_centernet_head.py",
     "./testcase/test_models/test_heads/test_yolo_x_head.py",
     "./testcase/test_models/test_heads/test_yolo_v3_head.py",
     "./testcase/test_models/test_heads/test_retinanet_head.py",
