@@ -45,6 +45,7 @@ python3 main.py --device=910B  --scope=single --case_id=4    # Test the case wit
 | YOLOXHead          | ✔          | ✔       |
 | CenterNetHead      | ✔          | ✔       |
 | FCOSHead           | ✔          | ✔       |
+| SOLOV2Head         | ✔          | ✔       |
 
 ### others:
 

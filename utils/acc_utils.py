@@ -109,6 +109,9 @@ class ComparisonHook(object):
             threshold = self.threshold[name]
             if module_name is not None and name + '_' + module_name in self.threshold_module.keys():
                 threshold = self.threshold_module[name + '_' + module_name]
+            if outputs is None and outputs_expected is None:
+                logging.warning('when compare {0}-{1} , outputs is None.'.format(module_name, name))
+                continue
             each_compare(outputs, outputs_expected, threshold, module_name)
         logging.info(" ")
 

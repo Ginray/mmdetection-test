@@ -71,54 +71,49 @@ class BaseUtil:
         elif isinstance(value, tuple):
             value_tuple = tuple(self.set_value_to_device(each_value) for each_value in value)
             value = value_tuple
+        elif value is None:
+            return value
         else:
             raise NotImplementedError('[set_value_to_device] {0} is currently not supported. '.format(type(value)))
         return value
 
     def do_real_data_backward(self, output, backward_output):
         backward_output = self.set_value_to_device(backward_output)
-
+        if backward_output is None:
+            logging.warning('when do_real_data_backward, backward output is None.')
+            return
         if isinstance(output, tuple) or isinstance(output, list):
             assert len(output) == len(backward_output)
             for (each_output, each_backward_output) in zip(output, backward_output):
-                each_output.backward(each_backward_output, retain_graph=True)
+                if isinstance(each_output, torch.Tensor):
+                    each_output.backward(each_backward_output, retain_graph=True)
+                else:
+                    self.do_real_data_backward(each_output, each_backward_output)
         elif isinstance(output, torch.Tensor):
             output.backward(backward_output)
         else:
             raise NotImplementedError(
                 '[do_real_data_backward] output {0} is currently not supported. '.format(type(output)))
 
-    def run_step(self, module, auto_backward, *input):
-        input = self.set_value_to_device(input)
-
-        output = module(*input)
-        if isinstance(output, tuple):
-            if isinstance(output[0], torch.Tensor):
-                if output[0].requires_grad:
-                    logging.warning('[run_step] Warning, output[0].requires_grad is False, set to True.')
-                    output[0].requires_grad_(True)
-                if auto_backward:
-                    output[0].mean().backward()
-            elif isinstance(output[0], list) or isinstance(output[0], tuple):
-                for each_output in output[0]:
-                    if each_output.requires_grad:
-                        logging.warning('[run_step] Warning, each_output.requires_grad is False, set to True.')
-                        each_output.requires_grad_(True)
-                    if auto_backward:
-                        each_output.mean().backward()
-            else:
-                raise NotImplementedError
+    def do_auto_backward(self, output):
+        if isinstance(output, tuple) or isinstance(output, list):
+            for each_output in output:
+                self.do_auto_backward(each_output)
         elif isinstance(output, torch.Tensor):
             if output.dtype != torch.float:
                 logging.warning('output.dtype is {0}, set to float.'.format(output.dtype))
                 output = output.float()
-            if not output.requires_grad:
-                logging.warning('output.requires_grad is False, set to True.')
-                output.requires_grad_(True)
-            if auto_backward:
+            if not output.requires_grad and auto_backward:
                 output.mean().backward()
         else:
-            raise NotImplementedError('[run_step] {0} is currently not supported. '.format(type(output)))
+            raise NotImplementedError('[do_auto_backward] {0} is currently not supported. '.format(type(output)))
+        return output
+
+    def run_step(self, module, auto_backward, *input):
+        input = self.set_value_to_device(input)
+
+        output = module(*input)
+        self.do_auto_backward(output)
         return output
 
     def run_and_compare_with_cpu_acc(self, module, module_name, *input):
