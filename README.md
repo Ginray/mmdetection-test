@@ -68,33 +68,33 @@ NPU上的精度和性能。
 
 ### backbones:
 
-| module名称 | 性能 | 精度 |
-|--------| ----------- | -------- |
-| ResNet | ✔           | ✔       |
+| case_id | module名称 | 性能 | 精度 |
+|--------| ----------- | -------- | -------- |
+| 0 | ResNet | ✔           | ✔       |
 
 ### necks:
 
-| module名称 | 性能     | 精度 |
-| ------------------ | ----------- | -------- |
-| FPN | ✔           | ✔       |
+| case_id | module名称 | 性能     | 精度 |
+| ------------------ | ----------- | -------- | -------- |
+| 1 | FPN | ✔           | ✔       |
 
 ### heads:
 
-| module名称 | 性能 | 精度 | 说明 |
-|--------------------| ----------- | -------- | -------- |
-| Shared2FCBBoxHead  | ✔           | ✔       |        |
-| SingleRoIExtractor | ❌ | ❌ | 当前版本不支持，计划330支持 |
-| SSDHead            | ✔          | ✔       |        |
-| RetinaHead         | ✔          | ✔       |        |
-| YOLOV3Head         | ✔          | ✔       |        |
-| YOLOXHead          | ✔          | ✔       |        |
-| CenterNetHead      | ✔          | ✔       |        |
-| FCOSHead           | ✔          | ✔       |        |
-| SOLOV2Head         | ✔          | ✔       |        |
+| case_id | module名称 | 性能 | 精度 | 说明 |
+|--------------------| ----------- | -------- | -------- | -------- |
+| 2 | Shared2FCBBoxHead  | ✔           | ✔       |        |
+| 3 | SingleRoIExtractor | ❌ | ❌ | 当前版本不支持，计划330支持 |
+| 4           | SSDHead            | ✔          | ✔       |        |
+| 5        | RetinaHead         | ✔          | ✔       |        |
+| 6        | YOLOV3Head         | ✔          | ✔       |        |
+| 7         | YOLOXHead          | ✔          | ✔       |        |
+| 8     | CenterNetHead      | ✔          | ✔       |        |
+| 9          | FCOSHead           | ✔          | ✔       |        |
+| 10       | SOLOV2Head         | ✔          | ✔       |        |
 
 ### others:
 
-| module名称 | 性能 | 精度 |
-|------------------| ----------- | -------- |
-| CrossEntropyLoss | ✔           | ✔        |
-| MaxIoUAssigner   | ✔          |  ✔      |
+| case_id | module名称 | 性能 | 精度 |
+|------------------| ----------- | -------- | -------- |
+| 11 | CrossEntropyLoss | ✔           | ✔        |
+| 12 | MaxIoUAssigner   | ✔          |  ✔      |
