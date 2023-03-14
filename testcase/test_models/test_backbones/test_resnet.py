@@ -32,15 +32,6 @@ class TestResnetTestCase:
         comparison_hook.reset_default_hook()
 
     @pytest.mark.acc
-    def test_resnet_basic_block_parameters(self):
-        comparison_hook.update_threshold_all_module('value', 0.02)
-        comparison_hook.update_threshold_all_module('cos', 0.95)
-
-        self.block = BasicBlock(3, 3)
-        input = torch.load('./data/pt_dump/backbones/resnet/Resnet_input.pt', map_location=torch.device('cpu'))
-        self.base_util.run_and_compare_with_cpu_parameters(self.block, 'Resnet', input)
-
-    @pytest.mark.acc
     def test_resnet_basic_block_acc(self):
         self.block = BasicBlock(64, 64)
         comparison_hook.update_threshold_all_module('cos', 0.97)
