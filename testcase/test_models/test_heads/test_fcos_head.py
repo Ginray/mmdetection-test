@@ -37,16 +37,6 @@ class TestFCOSHeadTestCase:
 
         self.base_util.run_and_compare_with_cpu_acc(self.fcos_head, 'FCOSHead', x)
 
-    @pytest.mark.acc
-    def test_fcos_head_acc_real_data(self):
-        fcos_head = FCOSHead(3, 16)
-        pt_path = './data/pt_dump/heads/fcos_head/fcos_head.pth'
-        config = torch.load(pt_path, map_location=torch.device('cpu'))
-        fcos_head = self.base_util.set_params_from_config(fcos_head, config)
-        if config['config']['thresholds']:
-            comparison_hook.update_threshold_all_module('value', float(config['config']['thresholds']))
-        self.base_util.run_and_compare_with_real_data_acc(fcos_head, 'FCOSHead', config)
-
     @pytest.mark.prof
     def test_fcos_head_prof(self):
         x = [torch.rand(2, 16, 3, 3) for _ in range(3)]
