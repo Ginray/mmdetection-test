@@ -17,7 +17,7 @@ NPU上的精度和性能。
 
   请均按照文档命令使用源码安装。
 
-  + 注意：安装mmcv框架时，如果遇到拉取代码的git链接无法下载时，可使用以下指令下载：
+  注意：安装mmcv框架时，如果遇到拉取代码的git链接无法下载时，可使用以下指令下载：
 
    ```
    git pull https://github.com/open-mmlab/mmcv.git
@@ -32,7 +32,7 @@ NPU上的精度和性能。
   90.90.192.17： /home/syl/code/mmdet-test/data
   ```
 
-  将data文件夹替换到mmdetection-test/data 目录：
+  将下载的data文件夹替换mmdetection-test/data 目录：
 
   文件结构如下所示：
 
