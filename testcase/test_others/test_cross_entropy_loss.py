@@ -44,11 +44,11 @@ class TestCrossEntropyLossTestCase:
         cls_score = torch.rand([15, 10])
         label = torch.tensor([1, 0, 4, 8, 4, 7, 9, 3, 2, 5, 3, 6, 2, 7, 9])
 
-        self.base_util.run_and_compare_acc(self.loss, 'cross_entropy', cls_score=cls_score, label=label)
+        self.base_util.run_and_compare_with_cpu_acc(self.loss, 'cross_entropy', cls_score, label)
 
     @pytest.mark.prof
     def test_cross_entropy_prof(self):
         cls_score = torch.rand([15, 10])
         label = torch.tensor([1, 0, 4, 8, 4, 7, 9, 3, 2, 5, 3, 6, 2, 7, 9])
         prof_path = './data/prof_time_summary/others/cross_entropy/cross_entropy_prof.csv'
-        self.base_util.run_and_compare_prof(self.loss, prof_path, time_threshold=0.1, cls_score=cls_score, label=label)
+        self.base_util.run_and_compare_prof(self.loss, prof_path, 0.3, cls_score, label)

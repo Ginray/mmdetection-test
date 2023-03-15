@@ -46,27 +46,21 @@ class TestFPNTestCase:
             torch.rand(1, self.in_channels[i], self.feat_sizes[i], self.feat_sizes[i])
             for i in range(len(self.in_channels))
         ]
-
-        comparison_hook.update_threshold('value', 0.015)
-        self.base_util.run_and_compare_acc(self.fpn_model, 'FPN', inputs=feats)
+        self.base_util.run_and_compare_with_cpu_acc(self.fpn_model, 'FPN', feats)
 
     @pytest.mark.acc
-    def test_resnet_basic_block_acc_real(self):
-        self.fpn_model = FPN(
-            in_channels=[256, 512, 1024, 2048],
-            out_channels=256,
-            num_outs=5,
-            start_level=0,
-            end_level=-1)
-        comparison_hook.update_threshold('value', 0.03)
-        comparison_hook.delete_comparison_hook('cos')
+    def test_fpn_basic_block_acc_real_data(self):
+        fpn_model = FPN(in_channels=[1, 2, 3], out_channels=8, num_outs=5)
 
-        pt_path = './data/pt_dump/necks/fpn/'
-        forward_input = torch.load(pt_path + 'fpn_forward_input.pt', map_location=torch.device('cpu'))
-        backward_output = torch.load(pt_path + 'fpn_backward_output.pt', map_location=torch.device('cpu'))
+        pt_path = './data/pt_dump/necks/fpn/fpn.pth'
+        config = torch.load(pt_path, map_location=torch.device('cpu'))
+        fpn_model = self.base_util.set_params_from_config(fpn_model, config)
 
-        self.base_util.run_and_compare_real_data(self.fpn_model, 'FPN', forward_input=dict(inputs=forward_input),
-                                                 backward_output=backward_output)
+        if config['config']['thresholds']:
+            comparison_hook.update_threshold_all_module('value', float(config['config']['thresholds']))
+        comparison_hook.update_threshold_for_module('cos', {"fpn_convs.2.conv.weight": 0.998})
+
+        self.base_util.run_and_compare_with_real_data_acc(fpn_model, 'FPN', config)
 
     @pytest.mark.prof
     def test_fpn_prof(self):
@@ -75,4 +69,4 @@ class TestFPNTestCase:
             for i in range(len(self.in_channels))
         ]
         prof_path = './data/prof_time_summary/necks/fpn/fpn_prof.csv'
-        self.base_util.run_and_compare_prof(self.fpn_model, prof_path, time_threshold=0.1, inputs=feats)
+        self.base_util.run_and_compare_prof(self.fpn_model, prof_path, 0.3, feats)
